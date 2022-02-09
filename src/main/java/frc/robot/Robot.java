@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -24,7 +25,7 @@ public class Robot extends TimedRobot {
 
   //Checar https://frc-pdr.readthedocs.io/en/latest/control/pid_control.html?highlight=Flywheel#flywheel
   //Checar tambien https://github.com/CrossTheRoadElec/Phoenix-Examples-Languages/blob/master/Java%20Talon%20FX%20(Falcon%20500)/VelocityClosedLoop/src/main/java/frc/robot/Robot.java
-  
+
 
 
   final TalonFXInvertType kinvertType = TalonFXInvertType.Clockwise;
@@ -52,6 +53,7 @@ public class Robot extends TimedRobot {
     double pos_Rot = (double) selSenPos / kUnidadesPorRev;
 
     SmartDashboard.putNumber("Posicion", pos_Rot);
+    
 
   }
 
@@ -64,11 +66,12 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
 
-   if(pos_Rot<150){
-    shooter.set(ControlMode.PercentOutput, 0.1);
-   }else{
-     shooter.set(ControlMode.PercentOutput, 0);
-   }
+    double targetVelocity_UnitsPer100ms = -0.5 * 2000.0 * 2048.0 / 600.0;
+			/* 2000 RPM in either direction */
+		shooter.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
+    SmartDashboard.putNumber("Velocidad", targetVelocity_UnitsPer100ms);
+
+ 
 
 
   }

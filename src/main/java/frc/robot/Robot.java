@@ -4,31 +4,74 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
-/**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
- * project.
- */
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+
 
 public class Robot extends TimedRobot {
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
-  @Override
-  public void robotInit() {}
+
+
+  final int kUnidadesPorRev = 2048;
+
+  final int maxRPM = 6000;
+  final double spShooter=0;
+  final double spRPA=0;
+
+  //Checar https://frc-pdr.readthedocs.io/en/latest/control/pid_control.html?highlight=Flywheel#flywheel
+  //Checar tambien https://github.com/CrossTheRoadElec/Phoenix-Examples-Languages/blob/master/Java%20Talon%20FX%20(Falcon%20500)/VelocityClosedLoop/src/main/java/frc/robot/Robot.java
+  
+
+
+  final TalonFXInvertType kinvertType = TalonFXInvertType.Clockwise;
+
+  WPI_TalonFX shooter = new WPI_TalonFX(0, "rio");
+
+  int _loops = 0;
+
+  double pos_Rot;
+
+
 
   @Override
-  public void robotPeriodic() {}
+  public void robotInit() {
+
+  shooter.configFactoryDefault();
+
+  }
 
   @Override
-  public void autonomousInit() {}
+  public void robotPeriodic() {
+
+
+    double selSenPos = shooter.getSelectedSensorPosition(0);
+    double pos_Rot = (double) selSenPos / kUnidadesPorRev;
+
+    SmartDashboard.putNumber("Posicion", pos_Rot);
+
+  }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousInit() {
+    shooter.configFactoryDefault();
+    pos_Rot=0.0;
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+
+   if(pos_Rot<150){
+    shooter.set(ControlMode.PercentOutput, 0.1);
+   }else{
+     shooter.set(ControlMode.PercentOutput, 0);
+   }
+
+
+  }
 
   @Override
   public void teleopInit() {}

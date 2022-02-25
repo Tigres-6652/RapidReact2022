@@ -1,75 +1,54 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 
 
 public class Robot extends TimedRobot {
 
+//DECLARACIONES 
 
-  final int kUnidadesPorRev = 2048;
+//Motores
+int KMOTORD1 = 1;//Chassis derecha 1
+int KMOTORD2 = 2;//Chassis derecha 2
+int KMOTORD3 = 3;//Chassis derecha 3
+int KMOTORI1 = 4;//Chassis izquierda 1
+int KMOTORI2 = 5;//Chassis izquierda 2
+int KMOTORI3 = 6;//Chassis izquierda 3
+int KMOTORS1 = 7;//Shooter 1
+int KMOTORS2 = 8;//Shooter 2
+int KMOTORIN = 9;//Intake 
+int KMOTORCP = 10;//Capucha 
+int KMOTORID = 11;//Indexer
 
-  final int maxRPM = 6000;
-  final double spShooter=0;
-  final double spRPA=0;
-
-  //Checar https://frc-pdr.readthedocs.io/en/latest/control/pid_control.html?highlight=Flywheel#flywheel
-  //Checar tambien https://github.com/CrossTheRoadElec/Phoenix-Examples-Languages/blob/master/Java%20Talon%20FX%20(Falcon%20500)/VelocityClosedLoop/src/main/java/frc/robot/Robot.java
-
-
-
-  final TalonFXInvertType kinvertType = TalonFXInvertType.Clockwise;
-
-  WPI_TalonFX shooter = new WPI_TalonFX(0, "rio");
-
-  int _loops = 0;
-
-  double pos_Rot;
-
-
+//Neumática 
+int KPISTIN1 = 1;
+int KPISTIN2 = 2;
 
   @Override
   public void robotInit() {
 
-  shooter.configFactoryDefault();
+ 
 
   }
 
   @Override
   public void robotPeriodic() {
 
-
-    double selSenPos = shooter.getSelectedSensorPosition(0);
-    double pos_Rot = (double) selSenPos / kUnidadesPorRev;
-
-    SmartDashboard.putNumber("Posicion", pos_Rot);
     
 
   }
 
   @Override
   public void autonomousInit() {
-    shooter.configFactoryDefault();
-    pos_Rot=0.0;
+   
   }
 
   @Override
   public void autonomousPeriodic() {
-
-    double targetVelocity_UnitsPer100ms = -0.5 * 2000.0 * 2048.0 / 600.0;
-			/* 2000 RPM in either direction */
-		shooter.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
-    SmartDashboard.putNumber("Velocidad", targetVelocity_UnitsPer100ms);
 
  
 

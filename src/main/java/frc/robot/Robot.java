@@ -28,13 +28,13 @@ public class Robot extends TimedRobot {
 
 //Chasis
 
-WPI_TalonSRX MOTORD1 = new WPI_TalonSRX(Motores.KMOTORD1);
-WPI_TalonSRX MOTORD2 = new WPI_TalonSRX(Motores.KMOTORD2);
-WPI_TalonSRX MOTORD3 = new WPI_TalonSRX(Motores.KMOTORD3);
+  WPI_TalonSRX MOTORD1 = new WPI_TalonSRX(Motores.KMOTORD1);
+  WPI_TalonSRX MOTORD2 = new WPI_TalonSRX(Motores.KMOTORD2);
+  WPI_TalonSRX MOTORD3 = new WPI_TalonSRX(Motores.KMOTORD3);
 
-WPI_TalonSRX MOTORI4 = new WPI_TalonSRX(Motores.KMOTORI4);
-WPI_TalonSRX MOTORI5 = new WPI_TalonSRX(Motores.KMOTORI5);
-WPI_TalonSRX MOTORI6 = new WPI_TalonSRX(Motores.KMOTORI6);
+  WPI_TalonSRX MOTORI4 = new WPI_TalonSRX(Motores.KMOTORI4);
+  WPI_TalonSRX MOTORI5 = new WPI_TalonSRX(Motores.KMOTORI5);
+  WPI_TalonSRX MOTORI6 = new WPI_TalonSRX(Motores.KMOTORI6);
 
   MotorControllerGroup motsI = new MotorControllerGroup(MOTORD1, MOTORD2, MOTORD3);
   MotorControllerGroup motsD = new MotorControllerGroup(MOTORI4, MOTORI5, MOTORI6);
@@ -45,15 +45,15 @@ WPI_TalonSRX MOTORI6 = new WPI_TalonSRX(Motores.KMOTORI6);
 //Neumática 
 
 
-Compressor COMPRESOR = new Compressor(0, PneumaticsModuleType.CTREPCM);
+  Compressor COMPRESOR = new Compressor(0, PneumaticsModuleType.CTREPCM);
 
-Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE);
-Solenoid PISTCHASIS = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS);
+  Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE);
+  Solenoid PISTCHASIS = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS);
 
 
 //CONTROLES
 
-Joystick JoystickDriver1 = new Joystick (Controllers.kJoystickDriver1);
+  Joystick JoystickDriver1 = new Joystick (Controllers.kJoystickDriver1);
 //Joystick JoystickDriver2 = new Joystick (Controllers.KJoystickDriver2);
 
 double velocidad;

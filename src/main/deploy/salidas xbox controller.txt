@@ -30,7 +30,7 @@ JoystickDriver1.getRawAxis(axis);
  joystick derecho eje Y:   5
 
 
-    FLECHITAS O PO
+    FLECHITAS O POV
 JoystickDriver1.getPOVCount();
 
 

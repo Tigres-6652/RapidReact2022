@@ -40,8 +40,19 @@ public class Constants {
         public static boolean IntakeState;
         public static boolean compresorState;;
 
-        public static double velocidad;
+        
 
     }
+
+    public static final class velocidades { // Motores
+
+        public static double velocidad;
+        public static double velocidadX=0.75;
+        public static double velocidadgiro=0.5;
+
+    }
+
+
+
 
 }

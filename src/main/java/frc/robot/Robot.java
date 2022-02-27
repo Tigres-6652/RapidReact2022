@@ -50,6 +50,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    
+    reiniciarSensores();
 
   }
 
@@ -145,6 +147,7 @@ public class Robot extends TimedRobot {
     chasis.arcadeDrive(0, 0);
     PISTCHASIS.set(false);
     PISTINTAKE.set(false);
+
   }
 
   public void reiniciarSensores() {
@@ -152,7 +155,6 @@ public class Robot extends TimedRobot {
     MOTORD1ENC.setSelectedSensorPosition(0);
     MOTORI4ENC.setSelectedSensorPosition(0);
     navx.reset();
-
 
   }
 

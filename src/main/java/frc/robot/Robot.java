@@ -1,9 +1,9 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.kauailabs.navx.frc.AHRS;
-
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -49,7 +49,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-
+    reiniciarSensores();
   }
 
   @Override
@@ -63,18 +63,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    reiniciarSensores();
   }
 
   @Override
-  public void autonomousPeriodic() {
+  public void autonomousPeriodic() { // Autonomo
+    AutonomoTaxi();
   }
 
   @Override
   public void teleopInit() {
+    reiniciarSensores();
   }
 
   @Override
-  public void teleopPeriodic() {
+  public void teleopPeriodic() { // Teleoperado
 
     manejarchasis();
     compresorbotonB();
@@ -85,6 +88,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    reiniciarSensores();
+
   }
 
   @Override
@@ -144,9 +149,9 @@ public class Robot extends TimedRobot {
 
   }
 
-  public void desactivartodo() {  
+  public void desactivartodo() {
 
-    //Desactiva totalmente todo, incluso si ya estaba desactivado antes
+    // Desactiva totalmente todo, incluso si ya estaba desactivado antes
     chasis.arcadeDrive(0, 0);
     PISTCHASIS.set(false);
     PISTINTAKE.set(false);
@@ -154,7 +159,7 @@ public class Robot extends TimedRobot {
 
   public void reiniciarSensores() {
 
-    //Reset de sensores de encoders, navx.
+    // Reset de sensores de encoders, navx.
     MOTORD1ENC.setSelectedSensorPosition(0);
     MOTORI4ENC.setSelectedSensorPosition(0);
     navx.reset();
@@ -171,5 +176,53 @@ public class Robot extends TimedRobot {
     }
   }
 
+  public void AutonomoTaxi() {
+
+    double encoIzq = MOTORI4ENC.getSelectedSensorPosition();
+    SmartDashboard.putNumber("Econder izquierdo", encoIzq);
+    double encoDer = MOTORD1ENC.getSelectedSensorPosition();
+    double testencodermenos = -1 * encoDer;
+    SmartDashboard.putNumber("Econder derecho", testencodermenos);
+
+    // encoizq
+
+    double vuelta = encoIzq / 4096 / 4.17;
+    double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
+    double distmeters = Units.inchesToMeters(distanciainches);
+
+    SmartDashboard.putNumber("distancia?", distmeters);
+
+    if (distmeters <= 3) {
+      chasis.arcadeDrive(0, 0.5);
+    }
+
+    if (distmeters >= 3 && distmeters <= 2.05) {
+      chasis.arcadeDrive(0, 0);
+    }
+
+    if (distmeters >= 3.1) {
+      chasis.arcadeDrive(0, -0.3);
+    }
+
+    double direccionx = navx.getDisplacementX();
+    double direcciony = navx.getDisplacementX();
+    double angulo = navx.getAngle();
+
+    SmartDashboard.putNumber("Coordenada x", direccionx);
+    SmartDashboard.putNumber("Coordenada y", direcciony);
+    SmartDashboard.putNumber("angulo", angulo);
+
+    if (distmeters <= 3 && angulo <= 5) {
+      chasis.arcadeDrive(-0.5, 0.7);
+    }
+    if (distmeters <= 3 && angulo >= 5) {
+      chasis.arcadeDrive(0.4, 0.7);
+    }
+
+    if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
+      chasis.arcadeDrive(-0, 0.7);
+    }
+
+  }
 
 }

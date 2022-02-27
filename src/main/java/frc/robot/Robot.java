@@ -4,10 +4,12 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -42,6 +44,9 @@ public class Robot extends TimedRobot {
   // INTAKE
   Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE);
   WPI_TalonSRX MOTORINTAKE = new WPI_TalonSRX(Motores.KMOTORIN);
+
+  //Navx
+  AHRS navx = new AHRS(SPI.Port.kMXP);
 
   @Override
   public void robotInit() {
@@ -93,7 +98,7 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
   }
 
-  //
+  //1
 
   public void controlarchasis() {
 
@@ -146,6 +151,8 @@ public class Robot extends TimedRobot {
 
     MOTORD1ENC.setSelectedSensorPosition(0);
     MOTORI4ENC.setSelectedSensorPosition(0);
+    navx.reset();
+
 
   }
 

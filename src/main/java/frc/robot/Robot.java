@@ -1,5 +1,3 @@
-//test
-
 
 package frc.robot;
 
@@ -19,6 +17,7 @@ import frc.robot.Constants.Controllers;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.statusrobot;
+import frc.robot.Constants.velocidades;
 
 public class Robot extends TimedRobot {
 
@@ -45,13 +44,11 @@ public class Robot extends TimedRobot {
   Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE);
   WPI_TalonSRX MOTORINTAKE = new WPI_TalonSRX(Motores.KMOTORIN);
 
-  //Navx
+  // Navx
   AHRS navx = new AHRS(SPI.Port.kMXP);
 
   @Override
   public void robotInit() {
-    
-    reiniciarSensores();
 
   }
 
@@ -65,20 +62,24 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+  }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+  }
 
   @Override
   public void teleopPeriodic() {
 
-    controlarchasis();
-    compresorbotonA();
+    manejarchasis();
+    compresorbotonB();
     IntakeBotA();
+    cambiosShifter();
 
   }
 
@@ -98,22 +99,23 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+
   }
 
-  //1
+  // SEPARACION DE PERIODOS//
 
-  public void controlarchasis() {
+  public void manejarchasis() {
 
     // Movimiento del chasis con control Xbox
-    statusrobot.velocidad = JoystickDriver1.getRawAxis(3) - JoystickDriver1.getRawAxis(2);
-    chasis.arcadeDrive(statusrobot.velocidad, JoystickDriver1.getRawAxis(0));
+    velocidades.velocidad = velocidades.velocidadX * JoystickDriver1.getRawAxis(3) - JoystickDriver1.getRawAxis(2);
+    chasis.arcadeDrive(velocidades.velocidad, velocidades.velocidadgiro * JoystickDriver1.getRawAxis(0));
 
   }
 
-  public void compresorbotonA() {
+  public void compresorbotonB() {
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
-    // Mas adelante cambiar esto al driver secundari
+    // Mas adelante cambiar esto al driver secundario
     if (JoystickDriver1.getRawButton(1)) {
       if (statusrobot.compresorState = true) {
         PISTINTAKE.set(true);
@@ -142,20 +144,31 @@ public class Robot extends TimedRobot {
 
   }
 
-  public void desactivartodo() {
+  public void desactivartodo() {  
 
+    //Desactiva totalmente todo, incluso si ya estaba desactivado antes
     chasis.arcadeDrive(0, 0);
     PISTCHASIS.set(false);
     PISTINTAKE.set(false);
-
   }
 
   public void reiniciarSensores() {
 
+    //Reset de sensores de encoders, navx.
     MOTORD1ENC.setSelectedSensorPosition(0);
     MOTORI4ENC.setSelectedSensorPosition(0);
     navx.reset();
 
+  }
+
+  public void cambiosShifter() {
+
+    if (JoystickDriver1.getPOV() == 0) {
+      PISTINTAKE.set(false);
+    }
+    if (JoystickDriver1.getPOV() == 180) {
+      PISTINTAKE.set(true);
+    }
   }
 
 

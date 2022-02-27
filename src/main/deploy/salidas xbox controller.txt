@@ -1,0 +1,44 @@
+para programar el control de xbox:
+
+
+
+
+    BOTONES:   
+JoystickDriver1.getRawButton();
+
+ A:                     1   
+ B:                     2
+ X:                     3
+ Y:                     4 
+ LB:                    5
+ RB:                    6
+ boton con cuadritos:   7
+ boton con lineas:      8
+ Picarle al joys left:  9
+ Picarle al joys right: 10
+ 
+
+    AXES:
+JoystickDriver1.getRawAxis(axis);
+
+ 
+ joystick izquierdo eje X: 0
+ joystick izquierdo eje y: 1
+ LB:                       2
+ RB:                       3
+ joystick derecho eje X:   4
+ joystick derecho eje Y:   5
+
+
+    FLECHITAS O PO
+JoystickDriver1.getPOVCount();
+
+
+arriba:          0
+arriba-derecha:  45
+derecha:         90
+derecha-abajo:   135
+abajo:           180
+abajo-izquierda: 225
+izquierda:       270
+izquierda-arriba:315

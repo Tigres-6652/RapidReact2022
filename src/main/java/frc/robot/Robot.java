@@ -55,9 +55,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
 
-    // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
-    SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
-    SmartDashboard.putBoolean("Compresor", statusrobot.compresorState);
+    ImprimirEnSmartDashboardRobotPeriodic();
 
   }
 
@@ -225,4 +223,11 @@ public class Robot extends TimedRobot {
 
   }
 
+  public void ImprimirEnSmartDashboardRobotPeriodic() {
+
+    // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
+    SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
+    SmartDashboard.putBoolean("Compresor", statusrobot.compresorState);
+
+  }
 }

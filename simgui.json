@@ -1,0 +1,20 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
+      "/LiveWindow/Ungrouped/Talon SRX [11]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon SRX [7]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon SRX [8]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon SRX [9]": "Motor Controller",
+      "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro"
+    },
+    "windows": {
+      "/LiveWindow/Ungrouped/DifferentialDrive[1]": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  }
+}

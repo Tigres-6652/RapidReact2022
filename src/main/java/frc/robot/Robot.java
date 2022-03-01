@@ -19,8 +19,8 @@ import frc.robot.Constants.Controles;
 import frc.robot.Constants.Kxbox;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
-import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.VelocidadChasis;
+import frc.robot.Constants.statusrobot;
 
 public class Robot extends TimedRobot {
 
@@ -49,7 +49,6 @@ public class Robot extends TimedRobot {
   WPI_VictorSPX MOTORINTAKE = new WPI_VictorSPX(Motores.Intake.KMOTORINTAKE);
   boolean motints = false;
 
-
   // SHOOTER //
   WPI_TalonSRX MOTORSHOOTERLEFT = new WPI_TalonSRX(Motores.Shooter.KMOTORSLeft);
   WPI_TalonSRX MOTORSHOOTERRIGHT = new WPI_TalonSRX(Motores.Shooter.KMOTORSRight);
@@ -62,6 +61,7 @@ public class Robot extends TimedRobot {
 
   // CLIMBER //
   WPI_TalonSRX MOTORCLIMBER = new WPI_TalonSRX(Motores.Climber.KMOTORCLIMBER);
+  
 
   // LIMELIGHT //
 
@@ -79,6 +79,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     reiniciarSensores();
+    desactivartodo();
+
   }
 
   @Override
@@ -91,6 +93,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     reiniciarSensores();
+    desactivartodo();
+
   }
 
   @Override
@@ -101,6 +105,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     reiniciarSensores();
+    desactivartodo();
+
   }
 
   @Override
@@ -117,6 +123,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     reiniciarSensores();
+    desactivartodo();
 
   }
 
@@ -148,7 +155,8 @@ public class Robot extends TimedRobot {
     // Movimiento del chasis con control Xbox
     double velocidad;
     velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),-VelocidadChasis.velocidadX * velocidad);
+    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+        -VelocidadChasis.velocidadX * velocidad);
 
   }
 
@@ -156,30 +164,29 @@ public class Robot extends TimedRobot {
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
     // Mas adelante cambiar esto al driver secundario
-    if (JoystickDriver1.getRawButton(ControlarMecanismos.compresor)) {
+    if (JoystickDriver1.getRawButtonPressed(ControlarMecanismos.compresor)) {
       if (statusrobot.compresorState) {
         COMPRESOR.enableDigital();
-        statusrobot.compresorState=false;
+        statusrobot.compresorState = false;
       } else {
         COMPRESOR.disable();
-        statusrobot.compresorState=true;
+        statusrobot.compresorState = true;
       }
     }
   }
-
 
   public void motorintake() {
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
     // Mas adelante cambiar esto al driver secundario
-    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.X)) {
+    if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.X)) {
       if (motints) {
-MOTORINTAKE.set(0.5);
-motints=false;
+        MOTORINTAKE.set(0.5);
+        motints = false;
 
       } else {
         MOTORINTAKE.set(0);
-        motints=true;
+        motints = true;
       }
     }
   }
@@ -188,18 +195,19 @@ motints=false;
 
     // ACCIONAMIENTO DE INTAKE CON BOTON "A"
 
-    if (JoystickDriver1.getRawButton(ControlarMecanismos.intake)) {
+    if (JoystickDriver1.getRawButtonPressed(ControlarMecanismos.intake)) {
       if (statusrobot.IntakeState) {
         PISTINTAKE.set(true);
-        //MOTORINTAKE.set(0.4);
-        statusrobot.IntakeState=false;
+        // MOTORINTAKE.set(0.4);
+        statusrobot.IntakeState = false;
       } else {
         PISTINTAKE.set(false);
-        //MOTORINTAKE.set(0);
-        statusrobot.IntakeState=true;
+        // MOTORINTAKE.set(0);
+        statusrobot.IntakeState = true;
 
       }
     }
+
 
   }
 
@@ -219,6 +227,8 @@ motints=false;
     MOTORI4ENC.setSelectedSensorPosition(0);
     navx.reset();
     COMPRESOR.disable();
+    statusrobot.IntakeState=false;
+    statusrobot.compresorState=false;
 
   }
 
@@ -284,8 +294,13 @@ motints=false;
   public void ImprimirEnSmartDashboardRobotPeriodic() {
 
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
+
+    boolean statusSmartcompr;
+     statusSmartcompr=!statusrobot.compresorState;
     SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
-    SmartDashboard.putBoolean("Compresor", statusrobot.compresorState);
+    SmartDashboard.putBoolean("Compresor", statusSmartcompr);
+    SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
+
 
   }
 

@@ -1,12 +1,27 @@
 {
+  "HALProvider": {
+    "Solenoids": {
+      "0": {
+        "header": {
+          "open": true
+        }
+      },
+      "window": {
+        "visible": true
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
+      "/LiveWindow/Ungrouped/Talon SRX [10]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [11]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon SRX [12]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [7]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [8]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [9]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Victor SPX [9]": "Motor Controller",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro"
     },
     "windows": {

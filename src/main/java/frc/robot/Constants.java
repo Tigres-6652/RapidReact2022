@@ -55,8 +55,8 @@ public class Constants {
 
     public static final class Controles { // Motores
 
-        public static int kJoystickDriver1 = 0;// Chassis derecha 1
-        public static int KJoystickDriver2 = 1;// Chassis derecha 1
+        public static int kJoystickDriver1 = 0;
+        public static int KJoystickDriver2 = 1;
 
     }
 
@@ -69,15 +69,15 @@ public class Constants {
 
     public static final class statusrobot { // Motores
 
-        public static boolean IntakeState;
-        public static boolean compresorState;;
+        public static boolean IntakeState=false;
+        public static boolean compresorState=false;
 
     }
 
     public static final class VelocidadChasis { // Motores
 
         public static double velocidadX = 0.75;
-        public static double velocidadgiro = 0.5;
+        public static double velocidadgiro = 1.75;
 
     }
 

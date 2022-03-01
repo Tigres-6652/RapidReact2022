@@ -2,6 +2,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Compressor;
@@ -45,7 +46,9 @@ public class Robot extends TimedRobot {
 
   // INTAKE //
   Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE);
-  WPI_TalonSRX MOTORINTAKE = new WPI_TalonSRX(Motores.Intake.KMOTORINTAKE);
+  WPI_VictorSPX MOTORINTAKE = new WPI_VictorSPX(Motores.Intake.KMOTORINTAKE);
+  boolean motints = false;
+
 
   // SHOOTER //
   WPI_TalonSRX MOTORSHOOTERLEFT = new WPI_TalonSRX(Motores.Shooter.KMOTORSLeft);
@@ -107,6 +110,7 @@ public class Robot extends TimedRobot {
     compresorbotonB();
     IntakeBotA();
     cambiosShifter();
+    motorintake();
 
   }
 
@@ -144,8 +148,7 @@ public class Robot extends TimedRobot {
     // Movimiento del chasis con control Xbox
     double velocidad;
     velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-    chasis.arcadeDrive(VelocidadChasis.velocidadX * velocidad,
-        VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_X));
+    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),-VelocidadChasis.velocidadX * velocidad);
 
   }
 
@@ -154,12 +157,30 @@ public class Robot extends TimedRobot {
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
     // Mas adelante cambiar esto al driver secundario
     if (JoystickDriver1.getRawButton(ControlarMecanismos.compresor)) {
-      if (statusrobot.compresorState = true) {
-        PISTINTAKE.set(true);
+      if (statusrobot.compresorState) {
+        COMPRESOR.enableDigital();
+        statusrobot.compresorState=false;
       } else {
-        PISTINTAKE.set(false);
+        COMPRESOR.disable();
+        statusrobot.compresorState=true;
       }
-      statusrobot.compresorState = !statusrobot.compresorState;
+    }
+  }
+
+
+  public void motorintake() {
+
+    // SE PRENDE EL COMPRESOR CON EL BOTON "B"
+    // Mas adelante cambiar esto al driver secundario
+    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.X)) {
+      if (motints) {
+MOTORINTAKE.set(0.5);
+motints=false;
+
+      } else {
+        MOTORINTAKE.set(0);
+        motints=true;
+      }
     }
   }
 
@@ -168,15 +189,16 @@ public class Robot extends TimedRobot {
     // ACCIONAMIENTO DE INTAKE CON BOTON "A"
 
     if (JoystickDriver1.getRawButton(ControlarMecanismos.intake)) {
-      if (statusrobot.IntakeState = true) {
+      if (statusrobot.IntakeState) {
         PISTINTAKE.set(true);
-        MOTORINTAKE.set(0.2);
+        //MOTORINTAKE.set(0.4);
+        statusrobot.IntakeState=false;
       } else {
         PISTINTAKE.set(false);
-        MOTORINTAKE.set(0);
+        //MOTORINTAKE.set(0);
+        statusrobot.IntakeState=true;
 
       }
-      statusrobot.IntakeState = !statusrobot.IntakeState;
     }
 
   }
@@ -196,6 +218,7 @@ public class Robot extends TimedRobot {
     MOTORD1ENC.setSelectedSensorPosition(0);
     MOTORI4ENC.setSelectedSensorPosition(0);
     navx.reset();
+    COMPRESOR.disable();
 
   }
 

@@ -79,6 +79,10 @@ public class Constants {
         public static boolean IntakeState=false;
         public static boolean compresorState=false;
 
+        public static boolean velocidadsh1=false;
+        public static boolean velocidadsh2=false;
+
+
     }
 
     public static final class VelocidadChasis { // Motores
@@ -126,5 +130,10 @@ public class Constants {
             public static int izquierda_arriba = 315;
 
         }
+    }
+
+    public static final class KPIDShooter{
+    public static double torpm=0.0003333333;  //1/2500
+
     }
 }

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ControlarMecanismos;
 import frc.robot.Constants.Controles;
+import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
@@ -77,9 +78,12 @@ public class Robot extends TimedRobot {
   StringBuilder _sb = new StringBuilder();
 
   /* Loop tracker for prints */
-  int _loops = 0;
 
   WPI_TalonFX _talon = new WPI_TalonFX(15);
+
+
+  public double rpmtotal=300;
+
 
   /*
    *
@@ -115,19 +119,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    reiniciarSensores();
-    desactivartodo();
+
+    testinitshooterpid();
+    /*reiniciarSensores();
+    desactivartodo();*/
 
   }
 
   @Override
   public void teleopPeriodic() { // Teleoperado
-
-    manejarchasis();
+testTeleopshooterPID();
+   /* manejarchasis();
     compresorbotonB();
     IntakeBotA();
     cambiosShifter();
-    motorintake();
+    motorintake();*/
 
   }
 
@@ -312,9 +318,15 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Compresor", statusSmartcompr);
     SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
 
+    double velocidadtest= _talon.getSelectedSensorVelocity()/4096*10*60*2;
+    SmartDashboard.putNumber("velocidad", velocidadtest );
+
   }
 
   public void testinitshooterpid() {
+
+    //no moverle a esto por favor👍
+
     /* Factory Default all hardware to prevent unexpected behaviour */
     _talon.configFactoryDefault();
 
@@ -337,71 +349,55 @@ public class Robot extends TimedRobot {
     _talon.config_kP(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kP, Constants.kTimeoutMs);
     _talon.config_kI(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kI, Constants.kTimeoutMs);
     _talon.config_kD(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kD, Constants.kTimeoutMs);
-    /*
-     * Talon FX does not need sensor phase set for its integrated sensor
-     * This is because it will always be correct if the selected feedback device is
-     * integrated sensor (default value)
-     * and the user calls getSelectedSensor* to get the sensor's position/velocity.
-     * 
-     * https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
-     * sensor-phase
-     */
-    // _talon.setSensorPhase(true);
+
+    //  https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
   }
 
   public void testTeleopshooterPID() {
-    /* Get gamepad axis */
-    double leftYstick = -1 * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
-    /* Get Talon/Victor's current output percentage */
-    double motorOutput = _talon.getMotorOutputPercent();
 
-    /* Prepare line to print */
-    _sb.append("\tout:");
-    /* Cast to int to remove decimal places */
-    _sb.append((int) (motorOutput * 100));
-    _sb.append("%"); // Percent
 
-    _sb.append("\tspd:");
-    _sb.append(_talon.getSelectedSensorVelocity(Constants.kPIDLoopIdx));
-    _sb.append("u"); // Native units
+    double rpmconv=KPIDShooter.torpm*rpmtotal;
+    double valor = -1 * rpmconv;//torpm*rpmtotal;//JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
-    /**
-     * When button 1 is held, start and run Velocity Closed loop.
-     * Velocity Closed Loop is controlled by joystick position x500 RPM, [-500, 500]
-     * RPM
-     */
-    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.RB)) {
-      /* Velocity Closed Loop */
+    SmartDashboard.putNumber("conv", rpmconv);
 
-      /**
-       * Convert 2000 RPM to units / 100ms.
-       * 2048 Units/Rev * 2000 RPM / 600 100ms/min in either direction:
-       * velocity setpoint is in units/100ms
-       */
-      double targetVelocity_UnitsPer100ms = leftYstick * 2000.0 * 2048.0 / 600.0;
-      /* 2000 RPM in either direction */
+      double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
       _talon.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
-
-      /* Append more signals to print when in speed mode. */
-      _sb.append("\terr:");
-      _sb.append(_talon.getClosedLoopError(Constants.kPIDLoopIdx));
-      _sb.append("\ttrg:");
-      _sb.append(targetVelocity_UnitsPer100ms);
-    } else {
-      /* Percent Output */
-
-      _talon.set(TalonFXControlMode.PercentOutput, leftYstick);
-    }
-
-    /* Print built string every 10 loops */
-    if (++_loops >= 10) {
-      _loops = 0;
-      System.out.println(_sb.toString());
-    }
-    /* Reset built string */
     _sb.setLength(0);
 
+  }
+
+  public void velocidad_shooter_control(){
+
+    /*if (JoystickDriver1.getRawButtonPressed(Kxbox.POV.derecha)) {
+      if (statusrobot.velocidadsh1) {
+
+        KPIDShooter.rpmtotal=0;
+
+        
+        statusrobot.velocidadsh1 = false;
+      } else {
+
+        KPIDShooter.rpmtotal=0;
+
+        statusrobot.velocidadsh1 = true;
+
+      }
+    }*/
+
+    if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.X)) {
+      if (statusrobot.velocidadsh2) {
+
+        velocidad_shooter_control();
+        statusrobot.velocidadsh2 = false;
+      } else {
+_talon.set(0);   
+     statusrobot.velocidadsh2 = true;
+
+      }
+    }
+  
   }
 }

@@ -70,10 +70,11 @@ public class Robot extends TimedRobot {
 
   // LIMELIGHT //
 
-  // ENCODERS //
-
   // Navx //
   AHRS navx = new AHRS(SPI.Port.kMXP);
+
+  // ESTRATEGIA AUTOAPUNTADO //
+  double[] rpmVal = new double[7];
 
   /*
    *
@@ -91,7 +92,14 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
 
-    ImprimirEnSmartDashboardRobotPeriodic();
+    // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
+    boolean statusSmartcompr;
+    statusSmartcompr = !statusrobot.compresorState;
+    SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
+    SmartDashboard.putBoolean("Compresor", statusSmartcompr);
+    SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
+    double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
+    SmartDashboard.putNumber("velocidad", velocidadtest);
 
   }
 
@@ -99,6 +107,14 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     reiniciarSensores();
     desactivartodo();
+
+    rpmVal[0] = 600;
+    rpmVal[1] = 1200;
+    rpmVal[2] = 2500;
+    rpmVal[3] = 3500;
+    rpmVal[4] = 4300;
+    rpmVal[5] = 5000;
+    rpmVal[6] = 6500;
 
   }
 
@@ -119,12 +135,22 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
-    ShooterPID();
-    manejarchasis();
+    // Chassis
+    // Movimiento del chasis con control Xbox
+
+    double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
+    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+        -VelocidadChasis.velocidadX * velocidad);
+
+    cambiosShifter();
+
+    // Intake
     compresorbotonB();
     IntakeBotA();
-    cambiosShifter();
     motorintake();
+
+    // Shooter
+    ShooterPID(120);
 
   }
 
@@ -156,16 +182,6 @@ public class Robot extends TimedRobot {
    *
    *
    */
-
-  public void manejarchasis() {
-
-    // Movimiento del chasis con control Xbox
-    double velocidad;
-    velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
-        -VelocidadChasis.velocidadX * velocidad);
-
-  }
 
   public void compresorbotonB() {
 
@@ -201,7 +217,6 @@ public class Robot extends TimedRobot {
   public void IntakeBotA() {
 
     // ACCIONAMIENTO DE INTAKE CON BOTON "A"
-
     if (JoystickDriver1.getRawButtonPressed(ControlarMecanismos.intake)) {
       if (statusrobot.IntakeState) {
         PISTINTAKE.set(true);
@@ -297,21 +312,6 @@ public class Robot extends TimedRobot {
 
   }
 
-  public void ImprimirEnSmartDashboardRobotPeriodic() {
-
-    // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
-
-    boolean statusSmartcompr;
-    statusSmartcompr = !statusrobot.compresorState;
-    SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
-    SmartDashboard.putBoolean("Compresor", statusSmartcompr);
-    SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
-
-    double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
-    SmartDashboard.putNumber("velocidad", velocidadtest);
-
-  }
-
   public void falconpidConfig() { // no moverle a esto por favor👍
 
     /* Factory Default all hardware to prevent unexpected behaviour */
@@ -345,11 +345,11 @@ public class Robot extends TimedRobot {
 
   }
 
-  public void ShooterPID() {
+  public void ShooterPID(double rpmtotal) {
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
-    double rpmconv = KPIDShooter.torpm * KPIDShooter.rpmtotal;
+    double rpmconv = KPIDShooter.torpm * rpmtotal;
     double valor = -1 * rpmconv;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
     SmartDashboard.putNumber("conv", rpmconv);
@@ -357,11 +357,7 @@ public class Robot extends TimedRobot {
     double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
     MOTORSHOOTERLEFT.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
     _sb.setLength(0);
-
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
-
-
   }
-
 
 }

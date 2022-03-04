@@ -1,11 +1,9 @@
 
-
 package frc.robot;
 
 //AQUI ESTAN TODAS LAS VARIABLES, ESTAS SE PUEDEN EDITAR MAS FACIL DESDE AQUI//
 
 public class Constants {
-
 
     public static final class ControlarMecanismos {
 
@@ -16,9 +14,9 @@ public class Constants {
 
     }
 
-    public static final class Motores { // Motores
+    public static final class Motores { // CONSTANTES DE MOTORES DEL ROBOT
 
-        public static final class Chasis { // Motores
+        public static final class Chasis {
             public static int KMOTORD1 = 1;// Chassis derecha 1
             public static int KMOTORD2 = 2;// Chassis derecha 2
             public static int KMOTORD3 = 3;// Chassis derecha 3
@@ -55,39 +53,41 @@ public class Constants {
 
     }
 
-    public static final class Controles { // Motores
+    public static final class Controles { // CONSTANTES DE LOS PUERTOS DE LOS CONTROLES
 
         public static int kJoystickDriver1 = 0;
         public static int KJoystickDriver2 = 1;
 
     }
 
-    public static final class Neumatica { // Motores
+    public static final class Neumatica { // // CONSTANTES DE LOS PUERTOS DE SOLENOIDES
 
         public static int KPISTINTAKE = 0; // Piston intake
         public static int KPISTCHASIS = 1; // Piston para cambios
 
     }
 
-    public static final class statusrobot { // Motores
+    public static final class statusrobot { // CONSTANTES TIPO BOOLEAN PARA BOTONES DE CONTROL
 
-        public static boolean IntakeState=false;
-        public static boolean compresorState=false;
+        public static boolean IntakeState = false;
+        public static boolean compresorState = false;
 
-        public static boolean velocidadsh1=false;
-        public static boolean velocidadsh2=false;
-
+        public static boolean velocidadsh1 = false;
+        public static boolean velocidadsh2 = false;
 
     }
 
-    public static final class VelocidadChasis { // Motores
+    public static final class VelocidadChasis { // AQUI SE CONTROLA LA VELOCIDAD MAXIMA DEL CHASIS
 
         public static double velocidadX = 0.75;
         public static double velocidadgiro = 0.55;
 
     }
 
-    public static final class Kxbox {
+    public static final class Kxbox { /*
+                                       * CONSTANTES PARA PROGRAMAR MAS RAPIDO EL CONTROL (FUNCIONA PARA SABER EL
+                                       * NUMERO DE ENTRADA DE CADA BOTON)
+                                       */
         public static final class BOTONES {
             // JoystickDriver1.getRawButton();
             public static int A = 1;
@@ -127,15 +127,14 @@ public class Constants {
         }
     }
 
-    public static final class KPIDShooter{
-    public static double torpm=0.0003333333;  //1/2500    //variable, 1/velocidad maxima
-	public static final int kSlotIdx = 0;
-	public static final int kPIDLoopIdx = 0;
-    public static final int kTimeoutMs = 30;
-    public final static Gains kGains_Velocit  = new Gains( 0.1, 0.001, 5, 1023.0/20660.0,  300,  1.00);
+    public static final class KPIDShooter {     //CONSTANTES PARA PID DEL SHOOTER (DE PREFERENCIA NO LE MUEVAS)
+        public static double torpm = 0.0003333333; // 1/2500 //variable, 1/velocidad maxima
+        public static final int kSlotIdx = 0;
+        public static final int kPIDLoopIdx = 0;
+        public static final int kTimeoutMs = 30;
+        public final static Gains kGains_Velocit = new Gains(0.1, 0.001, 5, 1023.0 / 20660.0, 300, 1.00);
 
-     //public static double rpmtotal; //Variable para controlar las rpm
-
+        // public static double rpmtotal; //Variable para controlar las rpm
 
     }
 }

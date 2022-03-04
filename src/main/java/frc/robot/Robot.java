@@ -54,8 +54,10 @@ public class Robot extends TimedRobot {
   boolean motints = false;
 
   // SHOOTER //
-  WPI_TalonSRX MOTORSHOOTERLEFT = new WPI_TalonSRX(Motores.Shooter.KMOTORSLeft);
-  WPI_TalonSRX MOTORSHOOTERRIGHT = new WPI_TalonSRX(Motores.Shooter.KMOTORSRight);
+  WPI_TalonFX MOTORSHOOTERLEFT = new WPI_TalonFX(Motores.Shooter.KMOTORSLeft);
+  WPI_TalonFX MOTORSHOOTERRIGHT = new WPI_TalonFX(Motores.Shooter.KMOTORSRight);
+
+  StringBuilder _sb = new StringBuilder(); /* String for output(PID) */
 
   // INDEXER //
   WPI_TalonSRX MOTORINDEXER = new WPI_TalonSRX(Motores.Indexer.KMOTORINDEXER);
@@ -72,18 +74,6 @@ public class Robot extends TimedRobot {
 
   // Navx //
   AHRS navx = new AHRS(SPI.Port.kMXP);
-
-  // TEST
-  /* String for output */
-  StringBuilder _sb = new StringBuilder();
-
-  /* Loop tracker for prints */
-
-  WPI_TalonFX _talon = new WPI_TalonFX(15);
-
-
-  public double rpmtotal=300;
-
 
   /*
    *
@@ -120,20 +110,21 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
 
-    testinitshooterpid();
-    /*reiniciarSensores();
-    desactivartodo();*/
+    falconpidConfig();
+    reiniciarSensores();
+    desactivartodo();
 
   }
 
   @Override
   public void teleopPeriodic() { // Teleoperado
-testTeleopshooterPID();
-   /* manejarchasis();
+
+    ShooterPID();
+    manejarchasis();
     compresorbotonB();
     IntakeBotA();
     cambiosShifter();
-    motorintake();*/
+    motorintake();
 
   }
 
@@ -152,12 +143,10 @@ testTeleopshooterPID();
 
   @Override
   public void testInit() {
-    testinitshooterpid();
   }
 
   @Override
   public void testPeriodic() {
-    testTeleopshooterPID();
   }
 
   /*
@@ -318,86 +307,61 @@ testTeleopshooterPID();
     SmartDashboard.putBoolean("Compresor", statusSmartcompr);
     SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
 
-    double velocidadtest= _talon.getSelectedSensorVelocity()/4096*10*60*2;
-    SmartDashboard.putNumber("velocidad", velocidadtest );
+    double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
+    SmartDashboard.putNumber("velocidad", velocidadtest);
 
   }
 
-  public void testinitshooterpid() {
-
-    //no moverle a esto por favor👍
+  public void falconpidConfig() { // no moverle a esto por favor👍
 
     /* Factory Default all hardware to prevent unexpected behaviour */
-    _talon.configFactoryDefault();
+    MOTORSHOOTERLEFT.configFactoryDefault();
 
     /* Config neutral deadband to be the smallest possible */
-    _talon.configNeutralDeadband(0.001);
+    MOTORSHOOTERLEFT.configNeutralDeadband(0.001);
 
     /* Config sensor used for Primary PID [Velocity] */
-    _talon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor,
-        Constants.kPIDLoopIdx,
-        Constants.kTimeoutMs);
+    MOTORSHOOTERLEFT.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor,
+        Constants.KPIDShooter.kPIDLoopIdx,
+        Constants.KPIDShooter.kTimeoutMs);
 
     /* Config the peak and nominal outputs */
-    _talon.configNominalOutputForward(0, Constants.kTimeoutMs);
-    _talon.configNominalOutputReverse(0, Constants.kTimeoutMs);
-    _talon.configPeakOutputForward(1, Constants.kTimeoutMs);
-    _talon.configPeakOutputReverse(-1, Constants.kTimeoutMs);
+    MOTORSHOOTERLEFT.configNominalOutputForward(0, Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERLEFT.configNominalOutputReverse(0, Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERLEFT.configPeakOutputForward(1, Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERLEFT.configPeakOutputReverse(-1, Constants.KPIDShooter.kTimeoutMs);
 
     /* Config the Velocity closed loop gains in slot0 */
-    _talon.config_kF(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kF, Constants.kTimeoutMs);
-    _talon.config_kP(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kP, Constants.kTimeoutMs);
-    _talon.config_kI(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kI, Constants.kTimeoutMs);
-    _talon.config_kD(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kD, Constants.kTimeoutMs);
+    MOTORSHOOTERLEFT.config_kF(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kF,
+        Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERLEFT.config_kP(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kP,
+        Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERLEFT.config_kI(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kI,
+        Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERLEFT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
+        Constants.KPIDShooter.kTimeoutMs);
 
-    //  https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
+    // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
   }
 
-  public void testTeleopshooterPID() {
+  public void ShooterPID() {
 
+    // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
-
-    double rpmconv=KPIDShooter.torpm*rpmtotal;
-    double valor = -1 * rpmconv;//torpm*rpmtotal;//JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
+    double rpmconv = KPIDShooter.torpm * KPIDShooter.rpmtotal;
+    double valor = -1 * rpmconv;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
     SmartDashboard.putNumber("conv", rpmconv);
 
-      double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
-      _talon.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
+    double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
+    MOTORSHOOTERLEFT.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
     _sb.setLength(0);
 
+    MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
+
+
   }
 
-  public void velocidad_shooter_control(){
 
-    /*if (JoystickDriver1.getRawButtonPressed(Kxbox.POV.derecha)) {
-      if (statusrobot.velocidadsh1) {
-
-        KPIDShooter.rpmtotal=0;
-
-        
-        statusrobot.velocidadsh1 = false;
-      } else {
-
-        KPIDShooter.rpmtotal=0;
-
-        statusrobot.velocidadsh1 = true;
-
-      }
-    }*/
-
-    if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.X)) {
-      if (statusrobot.velocidadsh2) {
-
-        velocidad_shooter_control();
-        statusrobot.velocidadsh2 = false;
-      } else {
-_talon.set(0);   
-     statusrobot.velocidadsh2 = true;
-
-      }
-    }
-  
-  }
 }

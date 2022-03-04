@@ -1,15 +1,10 @@
 
+
 package frc.robot;
 
 //AQUI ESTAN TODAS LAS VARIABLES, ESTAS SE PUEDEN EDITAR MAS FACIL DESDE AQUI//
 
 public class Constants {
-
-	public static final int kSlotIdx = 0;
-	public static final int kPIDLoopIdx = 0;
-    public static final int kTimeoutMs = 30;
-    public final static Gains kGains_Velocit  = new Gains( 0.1, 0.001, 5, 1023.0/20660.0,  300,  1.00);
-
 
 
     public static final class ControlarMecanismos {
@@ -88,7 +83,7 @@ public class Constants {
     public static final class VelocidadChasis { // Motores
 
         public static double velocidadX = 0.75;
-        public static double velocidadgiro = 1.75;
+        public static double velocidadgiro = 0.55;
 
     }
 
@@ -133,7 +128,14 @@ public class Constants {
     }
 
     public static final class KPIDShooter{
-    public static double torpm=0.0003333333;  //1/2500
+    public static double torpm=0.0003333333;  //1/2500    //variable, 1/velocidad maxima
+	public static final int kSlotIdx = 0;
+	public static final int kPIDLoopIdx = 0;
+    public static final int kTimeoutMs = 30;
+    public final static Gains kGains_Velocit  = new Gains( 0.1, 0.001, 5, 1023.0/20660.0,  300,  1.00);
+
+    public static double rpmtotal; //Variable para controlar las rpm
+
 
     }
 }

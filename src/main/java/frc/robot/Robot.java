@@ -133,8 +133,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 testTeleopshooterPID();
-   /* manejarchasis();
-=======
+    manejarchasis();
 
     // Chassis
     // Movimiento del chasis con control Xbox
@@ -150,11 +149,9 @@ testTeleopshooterPID();
           PISTCHASIS.set(Value.kReverse);
         }
     // Intake
->>>>>>> Stashed changes
     compresorbotonB();
     IntakeBotA();
-    cambiosShifter();
-    motorintake();*/
+    motorintake();
 
   }
 

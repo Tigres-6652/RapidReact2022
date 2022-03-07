@@ -70,7 +70,8 @@ public class Constants {
     public static final class Neumatica { // Motores
 
         public static int KPISTINTAKE = 0; // Piston intake
-        public static int KPISTCHASIS = 1; // Piston para cambios
+        public static int KPISTCHASIS1 = 1; // Piston para cambios
+        public static int KPISTCHASIS2 = 2; // Piston para cambios
 
     }
 
@@ -87,8 +88,13 @@ public class Constants {
 
     public static final class VelocidadChasis { // Motores
 
+<<<<<<< Updated upstream
         public static double velocidadX = 0.75;
         public static double velocidadgiro = 1.75;
+=======
+        public static double velocidadX = 0.7;
+        public static double velocidadgiro = 0.6;
+>>>>>>> Stashed changes
 
     }
 

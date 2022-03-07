@@ -9,11 +9,13 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,7 +41,7 @@ public class Robot extends TimedRobot {
   MotorControllerGroup MOTSI = new MotorControllerGroup(MOTORD1ENC, MOTORD2, MOTORD3);
   MotorControllerGroup MOTSD = new MotorControllerGroup(MOTORI4ENC, MOTORI5, MOTORI6);
   DifferentialDrive chasis = new DifferentialDrive(MOTSI, MOTSD);
-  Solenoid PISTCHASIS = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS);
+  DoubleSolenoid PISTCHASIS = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS1,Neumatica.KPISTCHASIS2);
 
   // Neumática // (los pistones estan en su respectivo mecanismo)
   Compressor COMPRESOR = new Compressor(0, PneumaticsModuleType.CTREPCM);
@@ -52,7 +54,7 @@ public class Robot extends TimedRobot {
   Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE);
   WPI_VictorSPX MOTORINTAKE = new WPI_VictorSPX(Motores.Intake.KMOTORINTAKE);
   boolean motints = false;
-
+ 
   // SHOOTER //
   WPI_TalonSRX MOTORSHOOTERLEFT = new WPI_TalonSRX(Motores.Shooter.KMOTORSLeft);
   WPI_TalonSRX MOTORSHOOTERRIGHT = new WPI_TalonSRX(Motores.Shooter.KMOTORSRight);
@@ -103,6 +105,8 @@ public class Robot extends TimedRobot {
 
     ImprimirEnSmartDashboardRobotPeriodic();
 
+    SmartDashboard.putNumber("pov", JoystickDriver1.getPOV());
+
   }
 
   @Override
@@ -128,8 +132,26 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() { // Teleoperado
+<<<<<<< Updated upstream
 testTeleopshooterPID();
    /* manejarchasis();
+=======
+
+    // Chassis
+    // Movimiento del chasis con control Xbox
+
+    double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
+    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+        -VelocidadChasis.velocidadX * velocidad);
+      //cambios
+        if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter1) {
+          PISTCHASIS.set(Value.kForward);
+        }
+        if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter2) {
+          PISTCHASIS.set(Value.kReverse);
+        }
+    // Intake
+>>>>>>> Stashed changes
     compresorbotonB();
     IntakeBotA();
     cambiosShifter();
@@ -232,7 +254,7 @@ testTeleopshooterPID();
 
     // Desactiva totalmente todo, incluso si ya estaba desactivado antes
     chasis.arcadeDrive(0, 0);
-    PISTCHASIS.set(false);
+    PISTCHASIS.set(Value.kOff);
     PISTINTAKE.set(false);
 
   }
@@ -249,15 +271,6 @@ testTeleopshooterPID();
 
   }
 
-  public void cambiosShifter() {
-
-    if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter1) {
-      PISTCHASIS.set(false);
-    }
-    if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter2) {
-      PISTCHASIS.set(true);
-    }
-  }
 
   public void AutonomoTaxi() {
 

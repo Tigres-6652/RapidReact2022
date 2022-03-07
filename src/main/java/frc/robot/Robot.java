@@ -8,12 +8,17 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,7 +34,6 @@ import frc.robot.Constants.statusrobot;
 public class Robot extends TimedRobot {
 
   // CHASIS //
-
   WPI_TalonSRX MOTORD1ENC = new WPI_TalonSRX(Motores.Chasis.KMOTORD1);
   WPI_TalonSRX MOTORD2 = new WPI_TalonSRX(Motores.Chasis.KMOTORD2);
   WPI_TalonSRX MOTORD3 = new WPI_TalonSRX(Motores.Chasis.KMOTORD3);
@@ -39,7 +43,7 @@ public class Robot extends TimedRobot {
   MotorControllerGroup MOTSI = new MotorControllerGroup(MOTORD1ENC, MOTORD2, MOTORD3);
   MotorControllerGroup MOTSD = new MotorControllerGroup(MOTORI4ENC, MOTORI5, MOTORI6);
   DifferentialDrive chasis = new DifferentialDrive(MOTSI, MOTSD);
-  Solenoid PISTCHASIS = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS);
+  DoubleSolenoid PISTCHASIS = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS1,Neumatica.KPISTCHASIS2);
 
   // Neumática // (los pistones estan en su respectivo mecanismo)
   Compressor COMPRESOR = new Compressor(0, PneumaticsModuleType.CTREPCM);
@@ -69,6 +73,13 @@ public class Robot extends TimedRobot {
   WPI_TalonSRX MOTORCLIMBER = new WPI_TalonSRX(Motores.Climber.KMOTORCLIMBER);
 
   // LIMELIGHT //
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTableEntry tx = table.getEntry("tx");
+  NetworkTableEntry ty = table.getEntry("ty");
+  NetworkTableEntry ta = table.getEntry("ta");
+
+
+
 
   // Navx //
   AHRS navx = new AHRS(SPI.Port.kMXP);
@@ -94,12 +105,23 @@ public class Robot extends TimedRobot {
 
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
     boolean statusSmartcompr;
+    double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
     statusSmartcompr = !statusrobot.compresorState;
+
     SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", statusSmartcompr);
     SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
-    double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
     SmartDashboard.putNumber("velocidad", velocidadtest);
+    SmartDashboard.putNumber("LL X Value", x);
+    SmartDashboard.putNumber("LL Y Value", y);
+    SmartDashboard.putNumber("LL X Area", area);
+
+    
+
+
 
   }
 
@@ -173,6 +195,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+
+
+
   }
 
   /*
@@ -183,6 +208,7 @@ public class Robot extends TimedRobot {
    *
    */
 
+  
   public void compresorbotonB() {
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
@@ -236,7 +262,7 @@ public class Robot extends TimedRobot {
 
     // Desactiva totalmente todo, incluso si ya estaba desactivado antes
     chasis.arcadeDrive(0, 0);
-    PISTCHASIS.set(false);
+    PISTCHASIS.set(Value.kOff);
     PISTINTAKE.set(false);
 
   }
@@ -256,10 +282,10 @@ public class Robot extends TimedRobot {
   public void cambiosShifter() {
 
     if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter1) {
-      PISTCHASIS.set(false);
+      PISTCHASIS.set(Value.kForward);
     }
     if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter2) {
-      PISTCHASIS.set(true);
+      PISTCHASIS.set(Value.kReverse);
     }
   }
 
@@ -347,6 +373,9 @@ public class Robot extends TimedRobot {
 
   public void ShooterPID(double rpmtotal) {
 
+
+  
+
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
     double rpmconv = KPIDShooter.torpm * rpmtotal;
@@ -360,4 +389,7 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
+
+  public void prom(double valprom){
+  }
 }

@@ -63,7 +63,9 @@ public class Constants {
     public static final class Neumatica { // // CONSTANTES DE LOS PUERTOS DE SOLENOIDES
 
         public static int KPISTINTAKE = 0; // Piston intake
-        public static int KPISTCHASIS = 1; // Piston para cambios
+        public static int KPISTCHASIS1 = 1; // Piston para cambios
+        public static int KPISTCHASIS2 = 2; // Piston para cambios
+
 
     }
 
@@ -79,8 +81,8 @@ public class Constants {
 
     public static final class VelocidadChasis { // AQUI SE CONTROLA LA VELOCIDAD MAXIMA DEL CHASIS
 
-        public static double velocidadX = 0.75;
-        public static double velocidadgiro = 0.55;
+        public static double velocidadX = 0.8;
+        public static double velocidadgiro = 0.7;
 
     }
 

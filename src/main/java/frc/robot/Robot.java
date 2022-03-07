@@ -1,6 +1,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -159,7 +160,6 @@ public class Robot extends TimedRobot {
 
     // Chassis
     // Movimiento del chasis con control Xbox
-
     double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
     chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
         -VelocidadChasis.velocidadX * velocidad);
@@ -195,9 +195,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-
-
-
+    ShootAdjust();
   }
 
   /*
@@ -373,11 +371,7 @@ public class Robot extends TimedRobot {
 
   public void ShooterPID(double rpmtotal) {
 
-
-  
-
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
-
     double rpmconv = KPIDShooter.torpm * rpmtotal;
     double valor = -1 * rpmconv;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
@@ -389,7 +383,19 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
+  public void ShootAdjust(){
 
-  public void prom(double valprom){
+    //Cambiar el Control que si va a hacer
+    if (JoystickDriver2.getRawButton(ControlarMecanismos.limeAdjust)){
+      double x = tx.getDouble(0.0);
+      double errorHeading = x;
+      double ajusteGiro = Constants.LimeLight.kp*x;
+
+      chasis.tankDrive(ajusteGiro, -ajusteGiro);
+    }
+
+
+
   }
+  
 }

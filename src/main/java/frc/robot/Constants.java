@@ -11,6 +11,7 @@ public class Constants {
         public static int compresor = Kxbox.BOTONES.B;
         public static int shifter1 = Kxbox.POV.derecha;
         public static int shifter2 = Kxbox.POV.izquierda;
+        public static int limeAdjust = Kxbox.BOTONES.A; //Esto es un test, cambiarlo al boton que si sea
 
     }
 
@@ -86,6 +87,20 @@ public class Constants {
 
     }
 
+    public static final class LimeLight{
+
+        public static double kp = -0.1;
+        // how many degrees back is your limelight rotated from perfectly vertical
+        public static double AnguloMontadoGrados = 25.0;
+        // distance from the center of the Limelight lens to the floor
+        public static double limelightLensHeightInches = 20.0;
+        // distance from the target to the floor
+        public static double goalHeightInches = 60.0;
+
+
+
+    }
+
     public static final class Kxbox { /*
                                        * CONSTANTES PARA PROGRAMAR MAS RAPIDO EL CONTROL (FUNCIONA PARA SABER EL
                                        * NUMERO DE ENTRADA DE CADA BOTON)
@@ -103,7 +118,6 @@ public class Constants {
             public static int boton_joystick_left = 9;
             public static int boton_joystick_right = 10;
         }
-
         public static final class AXES {
             // JoystickDriver1.getRawAxis(axis);
             public static int joystick_izquierdo_eje_X = 0;
@@ -114,7 +128,6 @@ public class Constants {
             public static int joystick_derecho_eje_Y = 5;
 
         }
-
         public static final class POV {
             // JoystickDriver1.getRawAxis(axis);
             public static int arriba = 0;

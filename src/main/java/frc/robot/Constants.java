@@ -88,13 +88,11 @@ public class Constants {
 
     public static final class VelocidadChasis { // Motores
 
-<<<<<<< Updated upstream
+
         public static double velocidadX = 0.75;
         public static double velocidadgiro = 1.75;
-=======
-        public static double velocidadX = 0.7;
-        public static double velocidadgiro = 0.6;
->>>>>>> Stashed changes
+
+
 
     }
 

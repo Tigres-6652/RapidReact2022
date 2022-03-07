@@ -132,7 +132,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() { // Teleoperado
-<<<<<<< Updated upstream
 testTeleopshooterPID();
    /* manejarchasis();
 =======

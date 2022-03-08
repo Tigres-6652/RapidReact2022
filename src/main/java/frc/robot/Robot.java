@@ -1,6 +1,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -157,9 +158,12 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
+if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
+    ShootAdjust();
+  }else {
+    //ShootAdjust();
     // Chassis
     // Movimiento del chasis con control Xbox
-
     double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
     chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
         -VelocidadChasis.velocidadX * velocidad);
@@ -173,7 +177,7 @@ public class Robot extends TimedRobot {
 
     // Shooter
     ShooterPID(120);
-
+  }
   }
 
   @Override
@@ -195,10 +199,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+    double x = tx.getDouble(0.0);
+    double errorHeading = x;
+    double ajusteGiro = Constants.LimeLight.kp*x;
 
 
-
-  }
+    
+    chasis.arcadeDrive(ajusteGiro,0 );  }
 
   /*
    *
@@ -331,7 +338,7 @@ public class Robot extends TimedRobot {
     if (distmeters <= 3 && angulo >= 5) {
       chasis.arcadeDrive(0.4, 0.7);
     }
-
+ 
     if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
       chasis.arcadeDrive(-0, 0.7);
     }
@@ -373,11 +380,7 @@ public class Robot extends TimedRobot {
 
   public void ShooterPID(double rpmtotal) {
 
-
-  
-
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
-
     double rpmconv = KPIDShooter.torpm * rpmtotal;
     double valor = -1 * rpmconv;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
@@ -389,7 +392,20 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
+  public void ShootAdjust(){
 
-  public void prom(double valprom){
+    //Cambiar el Control que si va a hacer
+      double x = tx.getDouble(0.0);
+      double errorHeading = x;
+      double ajusteGiro = Constants.LimeLight.kp*x;
+
+
+      
+      chasis.arcadeDrive(ajusteGiro,0 );
+    
+
+
+
   }
+  
 }

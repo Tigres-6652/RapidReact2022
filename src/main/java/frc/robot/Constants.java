@@ -11,7 +11,7 @@ public class Constants {
         public static int compresor = Kxbox.BOTONES.B;
         public static int shifter1 = Kxbox.POV.derecha;
         public static int shifter2 = Kxbox.POV.izquierda;
-        public static int limeAdjust = Kxbox.BOTONES.A; //Esto es un test, cambiarlo al boton que si sea
+        public static int limeAdjust = Kxbox.BOTONES.Y; //Esto es un test, cambiarlo al boton que si sea
 
     }
 
@@ -89,7 +89,7 @@ public class Constants {
 
     public static final class LimeLight{
 
-        public static double kp = -0.1;
+        public static double kp = -0.02;
         // how many degrees back is your limelight rotated from perfectly vertical
         public static double AnguloMontadoGrados = 25.0;
         // distance from the center of the Limelight lens to the floor

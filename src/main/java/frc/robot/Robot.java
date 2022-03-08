@@ -158,6 +158,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
+if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
+    ShootAdjust();
+  }else {
+    //ShootAdjust();
     // Chassis
     // Movimiento del chasis con control Xbox
     double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
@@ -173,7 +177,7 @@ public class Robot extends TimedRobot {
 
     // Shooter
     ShooterPID(120);
-
+  }
   }
 
   @Override
@@ -195,8 +199,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    ShootAdjust();
-  }
+    double x = tx.getDouble(0.0);
+    double errorHeading = x;
+    double ajusteGiro = Constants.LimeLight.kp*x;
+
+
+    
+    chasis.arcadeDrive(ajusteGiro,0 );  }
 
   /*
    *
@@ -329,7 +338,7 @@ public class Robot extends TimedRobot {
     if (distmeters <= 3 && angulo >= 5) {
       chasis.arcadeDrive(0.4, 0.7);
     }
-
+ 
     if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
       chasis.arcadeDrive(-0, 0.7);
     }
@@ -386,13 +395,14 @@ public class Robot extends TimedRobot {
   public void ShootAdjust(){
 
     //Cambiar el Control que si va a hacer
-    if (JoystickDriver2.getRawButton(ControlarMecanismos.limeAdjust)){
       double x = tx.getDouble(0.0);
       double errorHeading = x;
       double ajusteGiro = Constants.LimeLight.kp*x;
 
-      chasis.tankDrive(ajusteGiro, -ajusteGiro);
-    }
+
+      
+      chasis.arcadeDrive(ajusteGiro,0 );
+    
 
 
 

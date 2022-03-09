@@ -44,7 +44,8 @@ public class Robot extends TimedRobot {
   MotorControllerGroup MOTSI = new MotorControllerGroup(MOTORD1ENC, MOTORD2, MOTORD3);
   MotorControllerGroup MOTSD = new MotorControllerGroup(MOTORI4ENC, MOTORI5, MOTORI6);
   DifferentialDrive chasis = new DifferentialDrive(MOTSI, MOTSD);
-  DoubleSolenoid PISTCHASIS = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS1,Neumatica.KPISTCHASIS2);
+  DoubleSolenoid PISTCHASIS = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS1,
+      Neumatica.KPISTCHASIS2);
 
   // Neumática // (los pistones estan en su respectivo mecanismo)
   Compressor COMPRESOR = new Compressor(0, PneumaticsModuleType.CTREPCM);
@@ -78,9 +79,6 @@ public class Robot extends TimedRobot {
   NetworkTableEntry tx = table.getEntry("tx");
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
-
-
-
 
   // Navx //
   AHRS navx = new AHRS(SPI.Port.kMXP);
@@ -120,10 +118,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("LL Y Value", y);
     SmartDashboard.putNumber("LL X Area", area);
 
-    
-
-
-
   }
 
   @Override
@@ -158,26 +152,27 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
-if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
-    ShootAdjust();
-  }else {
-    //ShootAdjust();
-    // Chassis
-    // Movimiento del chasis con control Xbox
-    double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-    chasis.arcadeDrive(-VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
-        -VelocidadChasis.velocidadX * velocidad);
+    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.Y) == true) {
+      ShootAdjust();
+    } else {
+      // ShootAdjust();
+      // Chassis
+      // Movimiento del chasis con control Xbox
+      double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
+      chasis.arcadeDrive(
+          -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+          -VelocidadChasis.velocidadX * velocidad);
 
-    cambiosShifter();
+      cambiosShifter();
 
-    // Intake
-    compresorbotonB();
-    IntakeBotA();
-    motorintake();
+      // Intake
+      compresorbotonB();
+      IntakeBotA();
+      motorintake();
 
-    // Shooter
-    ShooterPID(120);
-  }
+      // Shooter
+      ShooterPID(120);
+    }
   }
 
   @Override
@@ -199,13 +194,25 @@ if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
 
   @Override
   public void testPeriodic() {
+
     double x = tx.getDouble(0.0);
     double errorHeading = x;
-    double ajusteGiro = Constants.LimeLight.kp*x;
+    double ajusteGiro = 0.0f;
+    float min_command = 0.05f;
+
+    if (x > 1.0) {
+
+      ajusteGiro = Constants.LimeLight.kp * x - min_command;
 
 
-    
-    chasis.arcadeDrive(ajusteGiro,0 );  }
+    } else if (x < 1.0) {
+
+      ajusteGiro = Constants.LimeLight.kp * x + min_command;
+
+    }
+    chasis.arcadeDrive(ajusteGiro, 0);
+
+  }
 
   /*
    *
@@ -215,7 +222,6 @@ if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
    *
    */
 
-  
   public void compresorbotonB() {
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
@@ -338,7 +344,7 @@ if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
     if (distmeters <= 3 && angulo >= 5) {
       chasis.arcadeDrive(0.4, 0.7);
     }
- 
+
     if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
       chasis.arcadeDrive(-0, 0.7);
     }
@@ -392,20 +398,15 @@ if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
-  public void ShootAdjust(){
+  public void ShootAdjust() {
 
-    //Cambiar el Control que si va a hacer
-      double x = tx.getDouble(0.0);
-      double errorHeading = x;
-      double ajusteGiro = Constants.LimeLight.kp*x;
+    // Cambiar el Control que si va a hacer
+    double x = tx.getDouble(0.0);
+    double errorHeading = x;
+    double ajusteGiro = Constants.LimeLight.kp * x;
 
-
-      
-      chasis.arcadeDrive(ajusteGiro,0 );
-    
-
-
+    chasis.arcadeDrive(ajusteGiro, 0);
 
   }
-  
+
 }

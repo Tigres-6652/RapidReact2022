@@ -152,17 +152,30 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
+
+
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.Y) == true) {
       ShootAdjust();
     } else {
       // ShootAdjust();
       // Chassis
       // Movimiento del chasis con control Xbox
-      double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-      chasis.arcadeDrive(
-          -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
-          -VelocidadChasis.velocidadX * velocidad);
 
+      if(Constants.modo_publico=true){
+        double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
+        chasis.arcadeDrive(
+            -VelocidadChasis.velocidadgiroPUBLICO * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+            -VelocidadChasis.velocidadXPUBLICO * velocidad);
+
+
+      }      if(Constants.modo_publico=false){
+
+        double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
+        chasis.arcadeDrive(
+            -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+            -VelocidadChasis.velocidadX * velocidad);
+
+      }
       cambiosShifter();
 
       // Intake

@@ -5,6 +5,8 @@ package frc.robot;
 
 public class Constants {
 
+    public static boolean modo_publico=false;
+
     public static final class ControlarMecanismos {
 
         public static int intake = Kxbox.BOTONES.A;
@@ -84,6 +86,9 @@ public class Constants {
 
         public static double velocidadX = 0.8;
         public static double velocidadgiro = 0.7;
+
+        public static double velocidadXPUBLICO = 0.55;
+        public static double velocidadgiroPUBLICO = 0.6;
 
     }
 

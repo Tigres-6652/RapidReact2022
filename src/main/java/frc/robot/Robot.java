@@ -121,21 +121,20 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
 
-    // calculate distance
+    // Calculos
     double distanceFromLimelightToGoalInches = (goalHeightInches - limelightHeightInches)
         / Math.tan(angleToGoalRadians);
-
-    // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
     boolean statusSmartcompr;
     double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
     statusSmartcompr = !statusrobot.compresorState;
-
     double distancia_metros_limelight_a_hub = distanceFromLimelightToGoalInches * 2.54;
-    SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
 
+
+     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
+    SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
     SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", statusSmartcompr);
     SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);

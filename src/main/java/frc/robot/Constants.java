@@ -65,7 +65,7 @@ public class Constants {
 
     public static final class Neumatica { // // CONSTANTES DE LOS PUERTOS DE SOLENOIDES
 
-        public static int KPISTINTAKE = 0; // Piston intake
+        public static int KPISTINTAKE = 3; // Piston intake
         public static int KPISTCHASIS1 = 1; // Piston para cambios
         public static int KPISTCHASIS2 = 2; // Piston para cambios
 
@@ -80,16 +80,21 @@ public class Constants {
         public static boolean velocidadsh1 = false;
         public static boolean velocidadsh2 = false;
 
+        public static boolean shooter = false;
+        public static boolean indexer = false;
+
+
+
+
+
     }
 
     public static final class VelocidadChasis { // AQUI SE CONTROLA LA VELOCIDAD MAXIMA DEL CHASIS
 
-        public static double velocidadX = 0.8;
-        public static double velocidadgiro = 0.7;
+        public static double velocidadX = 0.9;
+        public static double velocidadgiro = 0.85;
 
-        public static double velocidadXPUBLICO = 0.55;
-        public static double velocidadgiroPUBLICO = 0.6;
-
+ 
     }
 
     public static final class LimeLight{
@@ -127,8 +132,8 @@ public class Constants {
             // JoystickDriver1.getRawAxis(axis);
             public static int joystick_izquierdo_eje_X = 0;
             public static int joystick_izquierdo_eje_Y = 1;
-            public static int LB = 2;
-            public static int RB = 3;
+            public static int LT = 2;
+            public static int RT = 3;
             public static int joystick_derecho_eje_X = 4;
             public static int joystick_derecho_eje_Y = 5;
 

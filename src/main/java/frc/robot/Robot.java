@@ -26,13 +26,13 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ControlarMecanismos;
 import frc.robot.Constants.Controles;
-import frc.robot.Constants.KPIDCapucha;
 import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
+import frc.robot.Constants.Motores.Shooter;
 
 public class Robot extends TimedRobot {
 
@@ -68,13 +68,13 @@ public class Robot extends TimedRobot {
   StringBuilder _sb = new StringBuilder(); /* String for output(PID) */
 
   // INDEXER //
-  WPI_TalonSRX MOTORINDEXER = new WPI_TalonSRX(Motores.Indexer.KMOTORINDEXER);
+  WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
 
   // CAPUCHA //
   WPI_TalonSRX MOTORCAPUCHA = new WPI_TalonSRX(Motores.Capucha.KMOTORCAPUCHA);
-	boolean _lastButton1 = false;
+  boolean _lastButton1 = false;
   double targetPositionRotations;
-  
+
   // CLIMBER //
   WPI_TalonSRX MOTORCLIMBER = new WPI_TalonSRX(Motores.Climber.KMOTORCLIMBER);
 
@@ -129,19 +129,23 @@ public class Robot extends TimedRobot {
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
-    statusSmartcompr = !statusrobot.compresorState;
     double distancia_metros_limelight_a_hub = distanceFromLimelightToGoalInches * 2.54;
 
-
-     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
+    double capuchavalor = MOTORCAPUCHA.getSelectedSensorPosition();
+    double capucha_angulo = capuchavalor / 4096 * 360;
+    // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
     SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
-    SmartDashboard.putBoolean("Intake", statusrobot.IntakeState);
-    SmartDashboard.putBoolean("Compresor", statusSmartcompr);
-    SmartDashboard.putBoolean("prueba compresor", statusrobot.compresorState);
-    SmartDashboard.putNumber("velocidad", velocidadtest);
-    SmartDashboard.putNumber("LL X Value", x);
-    SmartDashboard.putNumber("LL Y Value", y);
-    SmartDashboard.putNumber("LL X Area", area);
+    SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
+    SmartDashboard.putBoolean("Compresor", statusrobot.compresorState);
+    /*
+     * SmartDashboard.putNumber("velocidad", velocidadtest);
+     * SmartDashboard.putNumber("LL X Value", x);
+     * SmartDashboard.putNumber("LL Y Value", y);
+     * SmartDashboard.putNumber("LL X Area", area);
+     */
+
+    SmartDashboard.putNumber("capucha angulo", capucha_angulo);
+    SmartDashboard.putNumber("capucha", capuchavalor);
 
   }
 
@@ -177,44 +181,53 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
-    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.Y) == true) {
-      chasis_shoot_Adjust();
-    } else {
-      // ShootAdjust();
-      // Chassis
-      // Movimiento del chasis con control Xbox
+    double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
+    chasis.arcadeDrive(
+        -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+        -VelocidadChasis.velocidadX * -velocidad);
 
-      if (Constants.modo_publico = true) {
-        double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-        chasis.arcadeDrive(
-            -VelocidadChasis.velocidadgiroPUBLICO * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
-            -VelocidadChasis.velocidadXPUBLICO * velocidad);
+    cambiosShifter();
 
-      }
-      if (Constants.modo_publico = false) {
+    // Intake
+    compresorbotonB();
+    IntakeBotA();
 
-        double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RB) - JoystickDriver1.getRawAxis(Kxbox.AXES.LB);
-        chasis.arcadeDrive(
-            -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
-            -VelocidadChasis.velocidadX * velocidad);
+    if (JoystickDriver2.getPOV()==Kxbox.POV.derecha) {
 
-      }
-      cambiosShifter();
-
-      // Intake
-      compresorbotonB();
-      IntakeBotA();
-      motorintake();
-      if(JoystickDriver1.getPOV()==Kxbox.POV.arriba){
-
-
-        ShooterPID(1200);
-      }
-      // Shooter
-      
-
-
+ShooterPID(-5600);
     }
+    if (JoystickDriver2.getPOV()==Kxbox.POV.abajo) {
+
+      ShooterPID(-4650);
+          }
+          if (JoystickDriver2.getPOV()==Kxbox.POV.izquierda) {
+
+            ShooterPID(-5900);
+                }
+                if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT)>=0.5) {
+
+                  MOTORINDEXER.set(0.5);
+                } else  if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT)<=0.5 ){
+                  MOTORINDEXER.set(0);
+}
+
+if(JoystickDriver2.getRawButton(Kxbox.BOTONES.LB)==true){
+
+MOTORCAPUCHA.setSelectedSensorPosition(0);
+
+}
+
+if(JoystickDriver2.getPOV()==-1){
+
+MOTORSHOOTERLEFT.set(0);
+MOTORSHOOTERRIGHT.set(0);
+
+
+}
+
+
+MOTORCAPUCHA.set(0.4* -JoystickDriver2.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y));
+  
   }
 
   @Override
@@ -277,39 +290,22 @@ public class Robot extends TimedRobot {
     }
   }
 
-  public void motorintake() {
-
-    // SE PRENDE EL COMPRESOR CON EL BOTON "B"
-    // Mas adelante cambiar esto al driver secundario
-    if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.X)) {
-      if (motints) {
-        MOTORINTAKE.set(0.5);
-        motints = false;
-
-      } else {
-        MOTORINTAKE.set(0);
-        motints = true;
-      }
-    }
-  }
-
   public void IntakeBotA() {
 
-    // ACCIONAMIENTO DE INTAKE CON BOTON "A"
     if (JoystickDriver1.getRawButtonPressed(ControlarMecanismos.intake)) {
       if (statusrobot.IntakeState) {
         PISTINTAKE.set(true);
-        // MOTORINTAKE.set(0.4);
+         MOTORINTAKE.set(-0.4);
         statusrobot.IntakeState = false;
       } else {
         PISTINTAKE.set(false);
-        // MOTORINTAKE.set(0);
+         MOTORINTAKE.set(0);
         statusrobot.IntakeState = true;
 
       }
     }
+    }
 
-  }
 
   public void desactivartodo() {
 
@@ -420,11 +416,16 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERLEFT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
         Constants.KPIDShooter.kTimeoutMs);
 
+        MOTORSHOOTERLEFT.configOpenloopRamp(0.4);
+        MOTORSHOOTERRIGHT.configOpenloopRamp(0.4);
+
+
+
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
   }
 
-  public void ShooterPID(double rpmtotal) {
+  public void ShooterPID(double rpmtotal) { // 6380 maximo
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
     double rpmconv = KPIDShooter.torpm * rpmtotal;
@@ -477,134 +478,150 @@ public class Robot extends TimedRobot {
 
     double distance_adjust = Constants.LimeLight.kp * distance_error;
 
-    chasis.arcadeDrive(ajusteGiro, distance_adjust);
+    chasis.arcadeDrive(ajusteGiro, 0);
 
   }
 
-  public void capucha(double angulo){
+  public void capucha(double angulo) {
 
     double leftYstick = JoystickDriver2.getY();
-		boolean button1 = JoystickDriver2.getRawButton(1);	// X-Button
-		boolean button2 = JoystickDriver2.getRawButton(2);	// A-Button
+    boolean button1 = JoystickDriver2.getRawButton(1); // X-Button
+    boolean button2 = JoystickDriver2.getRawButton(2); // A-Button
 
     double motorOutput = MOTORCAPUCHA.getMotorOutputPercent();
 
+    /* Deadband gamepad */
+    if (Math.abs(leftYstick) < 0.10) {
+      /* Within 10% of zero */
+      leftYstick = 0;
+    }
 
-/* Deadband gamepad */
-if (Math.abs(leftYstick) < 0.10) {
-  /* Within 10% of zero */
-  leftYstick = 0;
-}
+    /* Prepare line to print */
+    _sb.append("\tout:");
+    /* Cast to int to remove decimal places */
+    _sb.append((int) (motorOutput * 100));
+    _sb.append("%"); // Percent
 
-/* Prepare line to print */
-_sb.append("\tout:");
-/* Cast to int to remove decimal places */
-_sb.append((int) (motorOutput * 100));
-_sb.append("%");	// Percent
+    _sb.append("\tpos:");
+    _sb.append(MOTORCAPUCHA.getSelectedSensorPosition(0));
+    _sb.append("u"); // Native units
 
-_sb.append("\tpos:");
-_sb.append(MOTORCAPUCHA.getSelectedSensorPosition(0));
-_sb.append("u"); 	// Native units
+    /**
+     * When button 1 is pressed, perform Position Closed Loop to selected position,
+     * indicated by Joystick position x10, [-10, 10] rotations
+     */
+    if (!_lastButton1 && button1) {
+      /* Position Closed Loop */
 
-/**
- * When button 1 is pressed, perform Position Closed Loop to selected position,
- * indicated by Joystick position x10, [-10, 10] rotations
- */
-if (!_lastButton1 && button1) {
-  /* Position Closed Loop */
+      /* 10 Rotations * 4096 u/rev in either direction */
+      targetPositionRotations = leftYstick * 10.0 * 4096;
+      MOTORCAPUCHA.set(ControlMode.Position, targetPositionRotations);
+    }
 
-  /* 10 Rotations * 4096 u/rev in either direction */
-  targetPositionRotations = leftYstick * 10.0 * 4096;
-  MOTORCAPUCHA.set(ControlMode.Position, targetPositionRotations);
-}
+    /* When button 2 is held, just straight drive */
+    if (button2) {
+      /* Percent Output */
 
-/* When button 2 is held, just straight drive */
-if (button2) {
-  /* Percent Output */
+      MOTORCAPUCHA.set(ControlMode.PercentOutput, leftYstick);
+    }
 
-  MOTORCAPUCHA.set(ControlMode.PercentOutput, leftYstick);
-}
+    /* If Talon is in position closed-loop, print some more info */
+    if (MOTORCAPUCHA.getControlMode() == ControlMode.Position) {
+      /* ppend more signals to print when in speed mode. */
+      _sb.append("\terr:");
+      _sb.append(MOTORCAPUCHA.getClosedLoopError(0));
+      _sb.append("u"); // Native Units
 
-/* If Talon is in position closed-loop, print some more info */
-if (MOTORCAPUCHA.getControlMode() == ControlMode.Position) {
-  /* ppend more signals to print when in speed mode. */
-  _sb.append("\terr:");
-  _sb.append(MOTORCAPUCHA.getClosedLoopError(0));
-  _sb.append("u");	// Native Units
+      _sb.append("\ttrg:");
+      _sb.append(targetPositionRotations);
+      _sb.append("u"); /// Native Units
+    }
 
-  _sb.append("\ttrg:");
-  _sb.append(targetPositionRotations);
-  _sb.append("u");	/// Native Units
-}
+    /**
+     * Print every ten loops, printing too much too fast is generally bad
+     * for performance.
+     */
 
-/**
- * Print every ten loops, printing too much too fast is generally bad
- * for performance.
- */
+    /* Reset built string for next loop */
+    _sb.setLength(0);
 
-
-/* Reset built string for next loop */
-_sb.setLength(0);
-
-/* Save button state for on press detect */
-_lastButton1 = button1;
+    /* Save button state for on press detect */
+    _lastButton1 = button1;
 
   }
 
-public void capuchainit(){
-		/* Factory Default all hardware to prevent unexpected behaviour */
-		MOTORCAPUCHA.configFactoryDefault();
-		
-		/* Config the sensor used for Primary PID and sensor direction */
-    MOTORCAPUCHA.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 
-                                            Constants.KPIDCapucha.kPIDLoopIdx,
-				                            Constants.KPIDCapucha.kTimeoutMs);
+  public void capuchainit() {
+    /* Factory Default all hardware to prevent unexpected behaviour */
+    MOTORCAPUCHA.configFactoryDefault();
 
-		/* Ensure sensor is positive when output is positive */
-		MOTORCAPUCHA.setSensorPhase(Constants.KPIDCapucha.kSensorPhase);
+    /* Config the sensor used for Primary PID and sensor direction */
+    MOTORCAPUCHA.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative,
+        Constants.KPIDCapucha.kPIDLoopIdx,
+        Constants.KPIDCapucha.kTimeoutMs);
 
-		/**
-		 * Set based on what direction you want forward/positive to be.
-		 * This does not affect sensor phase. 
-		 */ 
-		MOTORCAPUCHA.setInverted(Constants.KPIDCapucha.kMotorInvert);
+    /* Ensure sensor is positive when output is positive */
+    MOTORCAPUCHA.setSensorPhase(Constants.KPIDCapucha.kSensorPhase);
 
-		/* Config the peak and nominal outputs, 12V means full */
-		MOTORCAPUCHA.configNominalOutputForward(0, Constants.KPIDCapucha.kTimeoutMs);
-		MOTORCAPUCHA.configNominalOutputReverse(0, Constants.KPIDCapucha.kTimeoutMs);
-		MOTORCAPUCHA.configPeakOutputForward(1, Constants.KPIDCapucha.kTimeoutMs);
-		MOTORCAPUCHA.configPeakOutputReverse(-1, Constants.KPIDCapucha.kTimeoutMs);
+    /**
+     * Set based on what direction you want forward/positive to be.
+     * This does not affect sensor phase.
+     */
+    MOTORCAPUCHA.setInverted(Constants.KPIDCapucha.kMotorInvert);
 
-		/**
-		 * Config the allowable closed-loop error, Closed-Loop output will be
-		 * neutral within this range. See Table in Section 17.2.1 for native
-		 * units per rotation.
-		 */
-		MOTORCAPUCHA.configAllowableClosedloopError(0, Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kTimeoutMs);
+    /* Config the peak and nominal outputs, 12V means full */
+    MOTORCAPUCHA.configNominalOutputForward(0, Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.configNominalOutputReverse(0, Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.configPeakOutputForward(1, Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.configPeakOutputReverse(-1, Constants.KPIDCapucha.kTimeoutMs);
 
-		/* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
-		MOTORCAPUCHA.config_kF(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kF, Constants.KPIDCapucha.kTimeoutMs);
-		MOTORCAPUCHA.config_kP(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kP, Constants.KPIDCapucha.kTimeoutMs);
-		MOTORCAPUCHA.config_kI(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kI, Constants.KPIDCapucha.kTimeoutMs);
-		MOTORCAPUCHA.config_kD(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kD, Constants.KPIDCapucha.kTimeoutMs);
+    /**
+     * Config the allowable closed-loop error, Closed-Loop output will be
+     * neutral within this range. See Table in Section 17.2.1 for native
+     * units per rotation.
+     */
+    MOTORCAPUCHA.configAllowableClosedloopError(0, Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kTimeoutMs);
 
-		/**
-		 * Grab the 360 degree position of the MagEncoder's absolute
-		 * position, and intitally set the relative sensor to match.
-		 */
-		int absolutePosition = MOTORCAPUCHA.getSensorCollection().getPulseWidthPosition();
+    /* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
+    MOTORCAPUCHA.config_kF(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kF,
+        Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.config_kP(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kP,
+        Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.config_kI(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kI,
+        Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.config_kD(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains.kD,
+        Constants.KPIDCapucha.kTimeoutMs);
 
-		/* Mask out overflows, keep bottom 12 bits */
-		absolutePosition &= 0xFFF;
-		if (Constants.KPIDCapucha.kSensorPhase) { absolutePosition *= -1; }
-		if (Constants.KPIDCapucha.kMotorInvert) { absolutePosition *= -1; }
-		
-		/* Set the quadrature (relative) sensor to match absolute */
-		MOTORCAPUCHA.setSelectedSensorPosition(absolutePosition, Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kTimeoutMs);
-    } 
+    /**
+     * Grab the 360 degree position of the MagEncoder's absolute
+     * position, and intitally set the relative sensor to match.
+     */
+    int absolutePosition = MOTORCAPUCHA.getSensorCollection().getPulseWidthPosition();
 
+    /* Mask out overflows, keep bottom 12 bits */
+    absolutePosition &= 0xFFF;
+    if (Constants.KPIDCapucha.kSensorPhase) {
+      absolutePosition *= -1;
+    }
+    if (Constants.KPIDCapucha.kMotorInvert) {
+      absolutePosition *= -1;
+    }
+
+    /* Set the quadrature (relative) sensor to match absolute */
+    MOTORCAPUCHA.setSelectedSensorPosition(absolutePosition, Constants.KPIDCapucha.kPIDLoopIdx,
+        Constants.KPIDCapucha.kTimeoutMs);
+  }
+
+  public void climbler() {
+    if (JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
+
+      MOTORCLIMBER.set(0.5);
+    }
+    if (JoystickDriver2.getPOV() == Kxbox.POV.abajo) {
+
+      MOTORCLIMBER.set(0.5);
+    } else if (JoystickDriver2.getPOV() == Kxbox.POV.abajo && JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
+
+    }
+
+  }
 }
-
-
-
-

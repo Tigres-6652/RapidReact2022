@@ -5,7 +5,7 @@ package frc.robot;
 
 public class Constants {
 
-    public static boolean modo_publico=false;
+    public static boolean modo_publico = false;
 
     public static final class ControlarMecanismos {
 
@@ -13,7 +13,7 @@ public class Constants {
         public static int compresor = Kxbox.BOTONES.B;
         public static int shifter1 = Kxbox.POV.derecha;
         public static int shifter2 = Kxbox.POV.izquierda;
-        public static int limeAdjust = Kxbox.BOTONES.Y; //Esto es un test, cambiarlo al boton que si sea
+        public static int limeAdjust = Kxbox.BOTONES.Y; // Esto es un test, cambiarlo al boton que si sea
 
     }
 
@@ -69,7 +69,6 @@ public class Constants {
         public static int KPISTCHASIS1 = 1; // Piston para cambios
         public static int KPISTCHASIS2 = 2; // Piston para cambios
 
-
     }
 
     public static final class statusrobot { // CONSTANTES TIPO BOOLEAN PARA BOTONES DE CONTROL
@@ -83,10 +82,6 @@ public class Constants {
         public static boolean shooter = false;
         public static boolean indexer = false;
 
-
-
-
-
     }
 
     public static final class VelocidadChasis { // AQUI SE CONTROLA LA VELOCIDAD MAXIMA DEL CHASIS
@@ -94,10 +89,9 @@ public class Constants {
         public static double velocidadX = 0.9;
         public static double velocidadgiro = 0.85;
 
- 
     }
 
-    public static final class LimeLight{
+    public static final class LimeLight {
 
         public static double kp = -0.02;
         // how many degrees back is your limelight rotated from perfectly vertical
@@ -107,7 +101,12 @@ public class Constants {
         // distance from the target to the floor
         public static double goalHeightInches = 60.0;
 
+    }
 
+    public static final class LimitSwitches {
+
+        public static int capucha = 4;
+        
 
     }
 
@@ -128,6 +127,7 @@ public class Constants {
             public static int boton_joystick_left = 9;
             public static int boton_joystick_right = 10;
         }
+
         public static final class AXES {
             // JoystickDriver1.getRawAxis(axis);
             public static int joystick_izquierdo_eje_X = 0;
@@ -138,6 +138,7 @@ public class Constants {
             public static int joystick_derecho_eje_Y = 5;
 
         }
+
         public static final class POV {
             // JoystickDriver1.getRawAxis(axis);
             public static int arriba = 0;
@@ -152,7 +153,7 @@ public class Constants {
         }
     }
 
-    public static final class KPIDShooter {     //CONSTANTES PARA PID DEL SHOOTER (DE PREFERENCIA NO LE MUEVAS)
+    public static final class KPIDShooter { // CONSTANTES PARA PID DEL SHOOTER (DE PREFERENCIA NO LE MUEVAS)
         public static double torpm = 0.0003333333; // 1/2500 //variable, 1/velocidad maxima
         public static final int kSlotIdx = 0;
         public static final int kPIDLoopIdx = 0;
@@ -163,40 +164,49 @@ public class Constants {
 
     }
 
-    public static final class KPIDCapucha{
-/**
-	 * Which PID slot to pull gains from. Starting 2018, you can choose from
-	 * 0,1,2 or 3. Only the first two (0,1) are visible in web-based
-	 * configuration.
-	 */
-	public static final int kSlotIdx = 0;
+    public static final class KPIDCapucha {
+        /**
+         * Which PID slot to pull gains from. Starting 2018, you can choose from
+         * 0,1,2 or 3. Only the first two (0,1) are visible in web-based
+         * configuration.
+         */
+        public static final int kSlotIdx = 0;
 
-	/**
-	 * Talon SRX/ Victor SPX will supported multiple (cascaded) PID loops. For
-	 * now we just want the primary one.
-	 */
-	public static final int kPIDLoopIdx = 0;
+        /**
+         * Talon SRX/ Victor SPX will supported multiple (cascaded) PID loops. For
+         * now we just want the primary one.
+         */
+        public static final int kPIDLoopIdx = 0;
 
-	/**
-	 * Set to zero to skip waiting for confirmation, set to nonzero to wait and
-	 * report to DS if action fails.
-	 */
-	public static final int kTimeoutMs = 30;
-	
-	/* Choose so that Talon does not report sensor out of phase */
-	public static boolean kSensorPhase = true;
+        /**
+         * Set to zero to skip waiting for confirmation, set to nonzero to wait and
+         * report to DS if action fails.
+         */
+        public static final int kTimeoutMs = 30;
 
-	/**
-	 * Choose based on what direction you want to be positive,
-	 * this does not affect motor invert. 
-	 */
-	public static boolean kMotorInvert = false;
+        /* Choose so that Talon does not report sensor out of phase */
+        public static boolean kSensorPhase = true;
 
-	/**
-	 * Gains used in Positon Closed Loop, to be adjusted accordingly
-     * Gains(kp, ki, kd, kf, izone, peak output);
-     */
-    static final GainsShoot kGains = new GainsShoot(0.15, 0.0, 1.0, 0.0, 0, 1.0);
+        /**
+         * Choose based on what direction you want to be positive,
+         * this does not affect motor invert.
+         */
+        public static boolean kMotorInvert = false;
+
+        /**
+         * Gains used in Positon Closed Loop, to be adjusted accordingly
+         * Gains(kp, ki, kd, kf, izone, peak output);
+         */
+        static final GainsShoot kGains = new GainsShoot(0.15, 0.0, 1.0, 0.0, 0, 1.0);
 
     }
+
+    public static final class velocidadesShooter {
+
+        public static final double fender = -5000;
+        public static final double tarmac = -5250;
+        public static final double launchpad = -6050;
+        public static double velocidad;
+    }
+
 }

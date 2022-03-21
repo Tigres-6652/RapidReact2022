@@ -37,6 +37,9 @@ import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.TimedRobot;
+
 
 public class Robot extends TimedRobot {
 
@@ -126,6 +129,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     reiniciarSensores();
     desactivartodo();
+    CameraServer.startAutomaticCapture();
 
   }
 

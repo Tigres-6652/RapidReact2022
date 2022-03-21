@@ -1,6 +1,10 @@
 
 package frc.robot;
 
+import java.util.concurrent.DelayQueue;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -25,6 +29,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ControlarMecanismos;
 import frc.robot.Constants.Controles;
+import frc.robot.Constants.KPIDCapucha;
 import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
 import frc.robot.Constants.Motores;
@@ -64,7 +69,7 @@ public class Robot extends TimedRobot {
   WPI_TalonFX MOTORSHOOTERLEFT = new WPI_TalonFX(Motores.Shooter.KMOTORSLeft);
   WPI_TalonFX MOTORSHOOTERRIGHT = new WPI_TalonFX(Motores.Shooter.KMOTORSRight);
 
-  StringBuilder _sb = new StringBuilder(); /* String for output(PID) */
+  StringBuilder _sbshoot = new StringBuilder(); /* String for output(PID) */
 
   // INDEXER //
   WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
@@ -74,7 +79,9 @@ public class Robot extends TimedRobot {
   DigitalInput limitcapucha = new DigitalInput(Constants.LimitSwitches.capucha);
   boolean _lastButton1 = false;
   double targetPositionRotations;
+  StringBuilder _sbcapucha = new StringBuilder(); /* String for output(PID) */
 
+  double AnguloCapuchaConfig;
 
   // CLIMBER //
   WPI_TalonSRX MOTORCLIMBER = new WPI_TalonSRX(Motores.Climber.KMOTORCLIMBER);
@@ -109,7 +116,6 @@ public class Robot extends TimedRobot {
   double capucha_angulo;
   double anguloFinal;
 
-
   /*
    *
    * SEPARACION DE INSTANCIAS
@@ -130,23 +136,21 @@ public class Robot extends TimedRobot {
     // Calculos
     double distanceFromLimelightToGoalInches = (goalHeightInches - limelightHeightInches)
         / Math.tan(angleToGoalRadians);
-    boolean statusSmartcompr;
     double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
     double distancia_metros_limelight_a_hub = distanceFromLimelightToGoalInches * 2.54;
-    
-    capuchavalor = MOTORCAPUCHA.getSelectedSensorPosition();
-    anguloFinal = -1*capuchavalor/ktick2Degree;
-    //capucha_angulo =  capuchavalor/23400*360;
 
+    capuchavalor = MOTORCAPUCHA.getSelectedSensorPosition();
+    anguloFinal = -1 * capuchavalor / ktick2Degree;
+    // capucha_angulo = capuchavalor/23400*360;
 
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
     SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
     SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", !statusrobot.compresorState);
-    SmartDashboard.putNumber("RPM shooter", velocidadesShooter.velocidad*-1);
+    SmartDashboard.putNumber("RPM shooter", velocidadesShooter.velocidad * -1);
     /*
      * SmartDashboard.putNumber("velocidad", velocidadtest);
      * SmartDashboard.putNumber("LL X Value", x);
@@ -154,7 +158,7 @@ public class Robot extends TimedRobot {
      * SmartDashboard.putNumber("LL X Area", area);
      */
 
-    //SmartDashboard.putNumber("capucha angulo", capucha_angulo);
+    // SmartDashboard.putNumber("capucha angulo", capucha_angulo);
     SmartDashboard.putNumber("deegree", anguloFinal);
     SmartDashboard.putNumber("capucha", capuchavalor);
     SmartDashboard.putBoolean("Limit", limitcapucha.get());
@@ -197,70 +201,9 @@ public class Robot extends TimedRobot {
     IntakeBotA();
     returnHome();
     climbler();
+    anguloyvelocidad();
 
-    //Disparar
-    if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.5) {
-      ShooterPID(velocidadesShooter.velocidad);
-    } else {
-      MOTORSHOOTERLEFT.set(0);
-      MOTORSHOOTERRIGHT.set(0);
-    }
-
-    //Tiro Fender
-    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.B)) {
-
-      velocidadesShooter.velocidad = velocidadesShooter.fender;  //4650
-      if(anguloFinal <= 8.5){
-        MOTORCAPUCHA.set(0.3);
-      }else{
-        MOTORCAPUCHA.set(0);
-      }
-    }
-
-    //Tarmac 1.84m
-    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
-
-      velocidadesShooter.velocidad = velocidadesShooter.tarmac;
-      if(anguloFinal <= 20){
-        MOTORCAPUCHA.set(0.3);
-      }else{
-        MOTORCAPUCHA.set(0);
-      }
-
-    }
-
-    //Launch Pad
-    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.X)) {
-
-      velocidadesShooter.velocidad = velocidadesShooter.launchpad;
-      if(anguloFinal <= 25){
-        MOTORCAPUCHA.set(0.3);
-      }else{
-        MOTORCAPUCHA.set(0);
-      }
-
-    }
-
-    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) == true) {
-
-      MOTORCAPUCHA.setSelectedSensorPosition(0);
-
-    }
-
-    if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
-
-      MOTORINDEXER.set(0.5);
-    } else {
-      MOTORINDEXER.set(0);
-    }
-
-
-    if(JoystickDriver2.getRawButton(Kxbox.BOTONES.boton_con_cuadritos)){
-
-      MOTORCAPUCHA.set(0.4 * -JoystickDriver2.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y));
-    }
   }
-  
 
   @Override
   public void disabledInit() {
@@ -272,7 +215,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {
     desactivartodo();
-    reiniciarSensores();
   }
 
   @Override
@@ -314,25 +256,41 @@ public class Robot extends TimedRobot {
         PISTINTAKE.set(true);
         statusrobot.IntakeState = false;
 
-        if (JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)) {
-
-          MOTORINTAKE.set(0.4);
-  
-        } else {
-          MOTORINTAKE.set(-0.4);
-
-
-      }
-    }else {
+        }
+      } else {
         PISTINTAKE.set(false);
-        MOTORINTAKE.set(-0);
+        //MOTORINTAKE.set(-0);
 
         statusrobot.IntakeState = true;
 
       }
 
+      if(JoystickDriver1.getRawButton(Kxbox.BOTONES.A)==true){
+
+        MOTORINTAKE.set(-0.45);
+        
+      }
+
+      if(JoystickDriver1.getRawButton(Kxbox.BOTONES.B)==true){
+
+        MOTORINTAKE.set(0.45);
+        
+      }
+
+      if(JoystickDriver1.getRawButton(Kxbox.BOTONES.Y)==true){
+
+        MOTORINTAKE.set(-0.45);
+        
+      }
+
+      if(JoystickDriver1.getRawButton(Kxbox.BOTONES.X)==true){
+
+        MOTORINTAKE.set(0);
+        
+      }
+
     }
-  }
+  
 
   public void desactivartodo() {
 
@@ -345,6 +303,11 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERLEFT.set(0);
     MOTORSHOOTERRIGHT.set(0);
 
+    if (limitcapucha.get() == true) {
+      MOTORCAPUCHA.set(-0.4);
+    } else {
+      MOTORCAPUCHA.set(0);
+    }
   }
 
   public void reiniciarSensores() {
@@ -387,7 +350,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("distancia?", distmeters);
 
     if (distmeters <= 3) {
-      chasis.arcadeDrive(0, 0.5);
+      chasis.arcadeDrive(0, -0.5);
     }
 
     if (distmeters >= 3 && distmeters <= 2.05) {
@@ -395,7 +358,7 @@ public class Robot extends TimedRobot {
     }
 
     if (distmeters >= 3.1) {
-      chasis.arcadeDrive(0, -0.3);
+      chasis.arcadeDrive(0, 0.3);
     }
 
     double direccionx = navx.getDisplacementX();
@@ -464,7 +427,7 @@ public class Robot extends TimedRobot {
 
     double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
     MOTORSHOOTERLEFT.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
-    _sb.setLength(0);
+    _sbshoot.setLength(0);
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
@@ -506,7 +469,6 @@ public class Robot extends TimedRobot {
 
   public void climbler() { // Probar
 
-  
     if (JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
 
       MOTORCLIMBER.set(-1);
@@ -515,25 +477,165 @@ public class Robot extends TimedRobot {
 
       MOTORCLIMBER.set(0.4);
     } else if (JoystickDriver2.getPOV() == -1) {
-MOTORCLIMBER.set(0);
+      MOTORCLIMBER.set(0);
     }
 
   }
 
-  public void returnHome () {
+  public void returnHome() {
 
-    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB) ){
-      if(limitcapucha.get() == true){
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
+      if (limitcapucha.get() == true) {
         MOTORCAPUCHA.set(-0.4);
-      }else{
+      } else {
         MOTORCAPUCHA.set(0);
       }
-    }    
+    }
   }
 
-  public void resetLimitSwitch(){
-    if(limitcapucha.get()==false){
+  public void resetLimitSwitch() {
+    if (limitcapucha.get() == false) {
       MOTORCAPUCHA.setSelectedSensorPosition(0);
     }
   }
+
+  public void capuchaPIDinit() {
+    /* Factory Default all hardware to prevent unexpected behaviour */
+    MOTORCAPUCHA.configFactoryDefault();
+
+    /* Config sensor used for Primary PID [Velocity] */
+    MOTORCAPUCHA.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative,
+        Constants.KPIDCapucha.kPIDLoopIdx,
+        Constants.KPIDCapucha.kTimeoutMs);
+
+    /**
+     * Phase sensor accordingly.
+     * Positive Sensor Reading should match Green (blinking) Leds on Talon
+     */
+    MOTORCAPUCHA.setSensorPhase(true);
+
+    /* Config the peak and nominal outputs */
+    MOTORCAPUCHA.configNominalOutputForward(0, Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.configNominalOutputReverse(0, Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.configPeakOutputForward(1, Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.configPeakOutputReverse(-1, Constants.KPIDCapucha.kTimeoutMs);
+    /* Config the Velocity closed loop gains in slot0 */
+    MOTORCAPUCHA.config_kF(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kF,
+        Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.config_kP(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kP,
+        Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.config_kI(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kI,
+        Constants.KPIDCapucha.kTimeoutMs);
+    MOTORCAPUCHA.config_kD(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kD,
+        Constants.KPIDCapucha.kTimeoutMs);
+
+  }
+
+  public void capuchaPIDteleop(double rpmcapucha) {
+
+    // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
+    double rpmconve = KPIDShooter.torpm * rpmcapucha;
+    double valor = -1 * rpmconve;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
+
+    SmartDashboard.putNumber("conv", rpmconve);
+
+    double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
+    MOTORSHOOTERLEFT.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
+    _sbshoot.setLength(0);
+    MOTORSHOOTERRIGHT.set(ControlMode.Velocity, -targetVelocity_UnitsPer100ms);
+
+  }
+
+  public void anguloyvelocidad() {
+
+    // Apuntar
+    if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.5) {
+      ShooterPID(velocidadesShooter.velocidad);
+    } else {
+      MOTORSHOOTERLEFT.set(0);
+      MOTORSHOOTERRIGHT.set(0);
+    }
+
+    //Disparar
+    if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
+
+      MOTORINDEXER.set(0.5);
+    } else {
+      MOTORINDEXER.set(0);
+    }
+
+    // capucha
+
+    if (anguloFinal <= AnguloCapuchaConfig + 1) {
+
+      capuchaPIDteleop(20);
+
+    }
+    if (anguloFinal <= AnguloCapuchaConfig - 0.1 && anguloFinal >= AnguloCapuchaConfig + 0.1) {
+
+      capuchaPIDteleop(0);
+    }
+    if (anguloFinal >= AnguloCapuchaConfig - 1) {
+
+      capuchaPIDteleop(-20);
+
+    }
+
+    // Tiro Fender
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.B)) {
+
+      velocidadesShooter.velocidad = velocidadesShooter.fender; // 4650
+      AnguloCapuchaConfig = 9;
+
+      /*
+       * if(anguloFinal <= 8.5){
+       * capuchaPIDteleop(10); }else{
+       * capuchaPIDteleop(0); }
+       */
+    }
+
+    // Tarmac 1.84m
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
+      AnguloCapuchaConfig = 20;
+      velocidadesShooter.velocidad = velocidadesShooter.tarmac;
+      /*
+       * if(anguloFinal <= 20){
+       * capuchaPIDteleop(10); }else{
+       * capuchaPIDteleop(0); }
+       */
+
+    }
+
+    // Launch Pad
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.X)) {
+
+      AnguloCapuchaConfig = 25;
+      
+      velocidadesShooter.velocidad = velocidadesShooter.launchpad;
+      /*
+       * if(anguloFinal <= 25){
+       * capuchaPIDteleop(10); }else{
+       * capuchaPIDteleop(0);
+       * }
+       */
+
+    }
+
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) == true) {
+
+      MOTORCAPUCHA.setSelectedSensorPosition(0);
+
+    }
+
+    
+
+
+  }
+
+  public void ajusteDistancia(){
+
+
+}
+
+
 }

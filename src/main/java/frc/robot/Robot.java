@@ -122,7 +122,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     reiniciarSensores();
-    desactivartodo();
     CameraServer.startAutomaticCapture();
 
   }
@@ -171,7 +170,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-    AutonomoTaxi();
+    //AutonomoTaxi();
   }
 
   @Override
@@ -200,7 +199,7 @@ public class Robot extends TimedRobot {
     Intake();
     returnHome();
     climbler();
-    anguloyvelocidad();
+    //anguloyvelocidad();
 
   }
 
@@ -220,12 +219,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+
+    falconpidConfig();
+
   }
 
   @Override
   public void testPeriodic() {
 
-  }
+ShooterPID(-1500);
+}
 
   /*
    *
@@ -428,6 +431,42 @@ public class Robot extends TimedRobot {
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
+
+
+
+
+    
+    /* Factory Default all hardware to prevent unexpected behaviour */
+    MOTORSHOOTERRIGHT.configFactoryDefault();
+
+    /* Config neutral deadband to be the smallest possible */
+    MOTORSHOOTERRIGHT.configNeutralDeadband(0.001);
+
+    /* Config sensor used for Primary PID [Velocity] */
+    MOTORSHOOTERRIGHT.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor,
+        Constants.KPIDShooter.kPIDLoopIdx,
+        Constants.KPIDShooter.kTimeoutMs);
+
+    /* Config the peak and nominal outputs */
+    MOTORSHOOTERRIGHT.configNominalOutputForward(0, Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERRIGHT.configNominalOutputReverse(0, Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERRIGHT.configPeakOutputForward(1, Constants.KPIDShooter.kTimeoutMs);
+    MOTORSHOOTERRIGHT.configPeakOutputReverse(-1, Constants.KPIDShooter.kTimeoutMs);
+
+    /* Config the Velocity closed loop gains in slot0 */
+    MOTORSHOOTERRIGHT.config_kF(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kF,
+        Constants.KPIDShooter.kTimeoutMs);
+        MOTORSHOOTERRIGHT.config_kP(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kP,
+        Constants.KPIDShooter.kTimeoutMs);
+        MOTORSHOOTERRIGHT.config_kI(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kI,
+        Constants.KPIDShooter.kTimeoutMs);
+        MOTORSHOOTERRIGHT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
+        Constants.KPIDShooter.kTimeoutMs);
+
+        MOTORSHOOTERRIGHT.configOpenloopRamp(1.4);
+
+    // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
+
   }
 
   public void ShooterPID(double rpmtotal) { // 6380 maximo
@@ -439,8 +478,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("conv", rpmconv);
 
     double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
-    MOTORSHOOTERLEFT.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
     _sbshoot.setLength(0);
+    MOTORSHOOTERLEFT.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
+
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
@@ -553,9 +593,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("conv", rpmconve);
 
     double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
-    MOTORSHOOTERLEFT.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
+    MOTORCAPUCHA.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
     _sbshoot.setLength(0);
-    MOTORSHOOTERRIGHT.set(ControlMode.Velocity, -targetVelocity_UnitsPer100ms);
 
   }
 

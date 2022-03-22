@@ -96,7 +96,7 @@ public class Constants {
 
     public static final class LimitSwitches {
 
-        public static int capucha = 4;
+        public static int capucha = 0;
         
 
     }

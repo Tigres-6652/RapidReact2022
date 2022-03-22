@@ -5,17 +5,6 @@ package frc.robot;
 
 public class Constants {
 
-    public static boolean modo_publico = false;
-
-    public static final class ControlarMecanismos {
-
-        public static int intake = Kxbox.BOTONES.A;
-        public static int compresor = Kxbox.BOTONES.B;
-        public static int shifter1 = Kxbox.POV.derecha;
-        public static int shifter2 = Kxbox.POV.izquierda;
-        public static int limeAdjust = Kxbox.BOTONES.Y; // Esto es un test, cambiarlo al boton que si sea
-
-    }
 
     public static final class Motores { // CONSTANTES DE MOTORES DEL ROBOT
 
@@ -65,9 +54,11 @@ public class Constants {
 
     public static final class Neumatica { // // CONSTANTES DE LOS PUERTOS DE SOLENOIDES
 
-        public static int KPISTINTAKE = 3; // Piston intake
-        public static int KPISTCHASIS1 = 1; // Piston para cambios
-        public static int KPISTCHASIS2 = 2; // Piston para cambios
+        public static int KPISTINTAKE1 = 0; // Piston intake
+        public static int KPISTINTAKE2 = 1; // Piston intake
+
+        public static int KPISTCHASIS1 = 2; // Piston para cambios
+        public static int KPISTCHASIS2 = 3; // Piston para cambios
 
     }
 

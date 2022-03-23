@@ -12,9 +12,9 @@ public class Constants {
             public static int KMOTORD1 = 1;// Chassis derecha 1
             public static int KMOTORD2 = 2;// Chassis derecha 2
             public static int KMOTORD3 = 3;// Chassis derecha 3
-            public static int KMOTORI4 = 4;// Chassis izquierda 1
+            public static int KMOTORI4 = 6;// Chassis izquierda 1
             public static int KMOTORI5 = 5;// Chassis izquierda 2
-            public static int KMOTORI6 = 6;// Chassis izquierda 3
+            public static int KMOTORI6 = 4;// Chassis izquierda 3
         }
 
         public static final class Shooter { // Motores
@@ -84,7 +84,7 @@ public class Constants {
 
     public static final class LimeLight {
 
-        public static double kp = -0.02;
+        public static double kp = -0.01f;
         // how many degrees back is your limelight rotated from perfectly vertical
         public static double AnguloMontadoGrados = 25.0;
         // distance from the center of the Limelight lens to the floor
@@ -97,6 +97,8 @@ public class Constants {
     public static final class LimitSwitches {
 
         public static int capucha = 0;
+
+        public static int indexer=2;
         
 
     }

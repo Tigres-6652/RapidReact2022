@@ -9,6 +9,9 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -23,15 +26,18 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.Controles;
 import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
+import frc.robot.Constants.LimitSwitches;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
+import frc.robot.Constants.Motores.Climber;
 import edu.wpi.first.cameraserver.CameraServer;
 
 public class Robot extends TimedRobot {
@@ -70,6 +76,7 @@ public class Robot extends TimedRobot {
 
   // INDEXER //
   WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
+  DigitalInput limitindexer=new DigitalInput(Constants.LimitSwitches.indexer);
 
   // CAPUCHA //
   WPI_TalonSRX MOTORCAPUCHA = new WPI_TalonSRX(Motores.Capucha.KMOTORCAPUCHA);
@@ -81,15 +88,14 @@ public class Robot extends TimedRobot {
   double AnguloCapuchaConfig;
 
   // CLIMBER //
-  WPI_TalonSRX MOTORCLIMBER = new WPI_TalonSRX(Motores.Climber.KMOTORCLIMBER);
 
+  
+  CANSparkMax MOTORCLIMBER =new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
   // LIMELIGHT //////
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   NetworkTableEntry tx = table.getEntry("tx");
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
-
-  double targetOffsetAngle_Vertical = ty.getDouble(0.0);
 
   // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
   // perfectamente vertical?
@@ -100,9 +106,6 @@ public class Robot extends TimedRobot {
 
   // distancia del objetivo al suelo
   double goalHeightInches = 103.9; // distancia hub 103.9 in
-
-  double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-  double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
   // Navx /////
   AHRS navx = new AHRS(SPI.Port.kMXP);
@@ -123,7 +126,6 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     reiniciarSensores();
     CameraServer.startAutomaticCapture();
-    
 
   }
 
@@ -132,8 +134,13 @@ public class Robot extends TimedRobot {
 
     resetLimitSwitch();
     // Calculos
+
+    double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
     double distanceFromLimelightToGoalInches = (goalHeightInches - limelightHeightInches)
         / Math.tan(angleToGoalRadians);
+
     double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
@@ -161,6 +168,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
 
     SmartDashboard.putNumber("capucha test", AnguloCapuchaConfig);
+
+    SmartDashboard.putBoolean("testindexer", limitindexer.get());
   }
 
   @Override
@@ -172,7 +181,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-    //AutonomoTaxi();
+    // AutonomoTaxi();
   }
 
   @Override
@@ -181,17 +190,17 @@ public class Robot extends TimedRobot {
     falconpidConfig();
     reiniciarSensores();
     desactivartodo();
-    //PIDchasis();
+    PIDchasis();
     capuchaPIDinit();
 
-    AnguloCapuchaConfig=0;
+    AnguloCapuchaConfig = 0;
 
   }
 
   @Override
   public void teleopPeriodic() { // Teleoperado
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
-      ajustedegiro();
+      chasis_shoot_Adjust();
     } else {
       // Mover Chassis
       double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
@@ -205,9 +214,6 @@ public class Robot extends TimedRobot {
     returnHome();
     climbler();
     anguloyvelocidad();
-
-
-
 
   }
 
@@ -228,8 +234,6 @@ public class Robot extends TimedRobot {
     }
   }
 
-  
-
   @Override
   public void testInit() {
 
@@ -240,8 +244,8 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
 
-ShooterPID(-1500);
-}
+    ShooterPID(-1500);
+  }
 
   /*
    *
@@ -295,7 +299,6 @@ ShooterPID(-1500);
       PISTINTAKE.set(Value.kForward);
       MOTORINTAKE.set(0.45);
 
-
     }
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.X) == true) {
@@ -316,7 +319,6 @@ ShooterPID(-1500);
 
     }
 
-
   }
 
   public void desactivartodo() {
@@ -331,7 +333,7 @@ ShooterPID(-1500);
     MOTORSHOOTERRIGHT.set(0);
     MOTORCAPUCHA.set(0);
     MOTORCLIMBER.set(0);
-
+    AnguloCapuchaConfig = 0;
 
   }
 
@@ -344,9 +346,10 @@ ShooterPID(-1500);
     COMPRESOR.disable();
     statusrobot.IntakeState = false;
     statusrobot.compresorState = false;
-    velocidadesShooter.velocidad=0;
+    velocidadesShooter.velocidad = 0;
 
     MOTORCAPUCHA.set(0);
+    AnguloCapuchaConfig = 0;
 
   }
 
@@ -443,11 +446,6 @@ ShooterPID(-1500);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
-
-
-
-
-    
     /* Factory Default all hardware to prevent unexpected behaviour */
     MOTORSHOOTERRIGHT.configFactoryDefault();
 
@@ -468,14 +466,14 @@ ShooterPID(-1500);
     /* Config the Velocity closed loop gains in slot0 */
     MOTORSHOOTERRIGHT.config_kF(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kF,
         Constants.KPIDShooter.kTimeoutMs);
-        MOTORSHOOTERRIGHT.config_kP(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kP,
+    MOTORSHOOTERRIGHT.config_kP(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kP,
         Constants.KPIDShooter.kTimeoutMs);
-        MOTORSHOOTERRIGHT.config_kI(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kI,
+    MOTORSHOOTERRIGHT.config_kI(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kI,
         Constants.KPIDShooter.kTimeoutMs);
-        MOTORSHOOTERRIGHT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
+    MOTORSHOOTERRIGHT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
         Constants.KPIDShooter.kTimeoutMs);
 
-        MOTORSHOOTERRIGHT.configOpenloopRamp(1.4);
+    MOTORSHOOTERRIGHT.configOpenloopRamp(1.4);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
@@ -502,11 +500,11 @@ ShooterPID(-1500);
     double ajusteGiro = 0.0f;
     float min_command = 0.05f;
 
-    if (x > 1.0) {
+    if (x > 0.5) {
 
       ajusteGiro = Constants.LimeLight.kp * x - min_command;
 
-    } else if (x < 1.0) {
+    } else if (x < 0.5) {
 
       ajusteGiro = Constants.LimeLight.kp * x + min_command;
 
@@ -520,16 +518,16 @@ ShooterPID(-1500);
     double ajusteGiro = 0.0f;
     float min_aim_command = 0.05f;
 
-    double heading_error = -tx.getDouble(0.0);
+    double heading_error = -x;
     double distance_error = -ty.getDouble(0.0);
 
-    if (x > 1.0) {
-      ajusteGiro = Constants.LimeLight.kp * heading_error * x - min_aim_command;
-    } else if (x < 1.0) {
-      ajusteGiro = Constants.LimeLight.kp * heading_error * x + min_aim_command;
+    if (x > 0.5) {
+      ajusteGiro = Constants.LimeLight.kp * heading_error - min_aim_command;
+    } else if (x < 0.5) {
+      ajusteGiro = Constants.LimeLight.kp * heading_error + min_aim_command;
     }
     double distance_adjust = Constants.LimeLight.kp * distance_error;
-    chasis.arcadeDrive(ajusteGiro, distance_adjust);
+    chasis.arcadeDrive(ajusteGiro * 0.3, 0);
   }
 
   public void climbler() { // Probar
@@ -559,8 +557,14 @@ ShooterPID(-1500);
   }
 
   public void resetLimitSwitch() {
+
+    double corrientecapucha = MOTORCAPUCHA.getSupplyCurrent();
     if (limitcapucha.get() == false) {
       MOTORCAPUCHA.setSelectedSensorPosition(0);
+    }
+
+    if (corrientecapucha > 3) {
+
     }
   }
 
@@ -621,10 +625,16 @@ ShooterPID(-1500);
     }
 
     // Disparar
-    if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
+
+
+    if(JoystickDriver2.getRawButton(Kxbox.BOTONES.LB)&&limitindexer.get()==true){
+
+      MOTORINDEXER.set(0.3);
+
+    }else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
 
       MOTORINDEXER.set(0.5);
-    } else {
+    } else  {
       MOTORINDEXER.set(0);
     }
 
@@ -632,11 +642,11 @@ ShooterPID(-1500);
 
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
 
-MOTORCAPUCHA.set(0.3);
-    }else if ((anguloFinal >= (-AnguloCapuchaConfig - 1 )) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
+      MOTORCAPUCHA.set(0.3);
+    } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
 
       MOTORCAPUCHA.set(0);
-    }else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
+    } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
 
       MOTORCAPUCHA.set(-0.3);
 
@@ -648,22 +658,24 @@ MOTORCAPUCHA.set(0.3);
       velocidadesShooter.velocidad = velocidadesShooter.fender; // 4650
       AnguloCapuchaConfig = 9;
 
-      
-        /*if(anguloFinal <= 8.5){
-          MOTORCAPUCHA.set(0.3); }else{
-            MOTORCAPUCHA.set(0); }*/
-       
+      /*
+       * if(anguloFinal <= 8.5){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
+
     }
 
     // Tarmac 1.84m
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
       AnguloCapuchaConfig = 20;
       velocidadesShooter.velocidad = velocidadesShooter.tarmac;
-      
-       /* if(anguloFinal <= 20){
-          MOTORCAPUCHA.set(0.3); }else{
-        MOTORCAPUCHA.set(0); }*/
-       
+
+      /*
+       * if(anguloFinal <= 20){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
 
     }
 
@@ -673,33 +685,44 @@ MOTORCAPUCHA.set(0.3);
       AnguloCapuchaConfig = 25;
 
       velocidadesShooter.velocidad = velocidadesShooter.launchpad;
-      
-        /*if(anguloFinal <= 25){
-          MOTORCAPUCHA.set(0.3); }else{
-            MOTORCAPUCHA.set(0);
-        }*/
-       
+
+      /*
+       * if(anguloFinal <= 25){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0);
+       * }
+       */
 
     }
 
-
-
   }
 
-  public void ajusteDeTiro() {
-
-  }
-
-  public void PIDchasis(){
-
+  public void PIDchasis() {
     MOTORD1ENC.configFactoryDefault();
+    MOTORD2.configFactoryDefault();
+    MOTORD3.configFactoryDefault();
+
     MOTORI4ENC.configFactoryDefault();
+    MOTORI5.configFactoryDefault();
+    MOTORI6.configFactoryDefault();
 
     MOTORD1ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-    MOTORI4ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    MOTORD2.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    MOTORD3.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
-    MOTORD1ENC.configOpenloopRamp(0.8);
-    MOTORI4ENC.configOpenloopRamp(0.8);
+    MOTORI4ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    MOTORI5.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    MOTORI6.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+
+    MOTORD1ENC.configOpenloopRamp(0.15);
+    MOTORD2.configOpenloopRamp(0.15);
+    MOTORD3.configOpenloopRamp(0.15);
+
+    MOTORI4ENC.configOpenloopRamp(0.15);
+    MOTORI5.configOpenloopRamp(0.15);
+    MOTORI6.configOpenloopRamp(0.15);
   }
+
+
 
 }

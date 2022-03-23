@@ -23,15 +23,15 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Controles;
 import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
-import frc.robot.Constants.LimitSwitches;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
@@ -76,7 +76,7 @@ public class Robot extends TimedRobot {
 
   // INDEXER //
   WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
-  DigitalInput limitindexer=new DigitalInput(Constants.LimitSwitches.indexer);
+  DigitalInput limitindexer = new DigitalInput(Constants.LimitSwitches.indexer);
 
   // CAPUCHA //
   WPI_TalonSRX MOTORCAPUCHA = new WPI_TalonSRX(Motores.Capucha.KMOTORCAPUCHA);
@@ -88,9 +88,8 @@ public class Robot extends TimedRobot {
   double AnguloCapuchaConfig;
 
   // CLIMBER //
+  CANSparkMax MOTORCLIMBER = new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
 
-  
-  CANSparkMax MOTORCLIMBER =new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
   // LIMELIGHT //////
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   NetworkTableEntry tx = table.getEntry("tx");
@@ -115,6 +114,11 @@ public class Robot extends TimedRobot {
   double capuchavalor;
   double capucha_angulo;
   double anguloFinal;
+
+//TIEMPOS PARA AUTONOMO
+
+Timer timer=new Timer();
+boolean iniciotaxi=false;
 
   /*
    *
@@ -167,21 +171,47 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Limit", limitcapucha.get());
     SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
 
-    SmartDashboard.putNumber("capucha test", AnguloCapuchaConfig);
-
     SmartDashboard.putBoolean("testindexer", limitindexer.get());
+
+    SmartDashboard.putNumber("Time Match", Timer.getMatchTime());
   }
 
   @Override
   public void autonomousInit() {
     reiniciarSensores();
     desactivartodo();
+    timer.reset();
+    ShooterPID(velocidadesShooter.fender);
+    AnguloCapuchaConfig = 9;
+
+    Timer.delay(2);
+
+    MOTORINDEXER.set(0.5);
+
+    Timer.delay(2);
+
+    MOTORSHOOTERLEFT.set(0);
+    MOTORSHOOTERRIGHT.set(0);
+    MOTORINDEXER.set(0);
+    Timer.delay(0.5);
+
+    iniciotaxi=true;
+
+  
+
 
   }
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-    // AutonomoTaxi();
+anguloyvelocidadautonomo();
+
+if(iniciotaxi==true){
+
+AutonomoTaxi();
+
+}
+
   }
 
   @Override
@@ -191,7 +221,6 @@ public class Robot extends TimedRobot {
     reiniciarSensores();
     desactivartodo();
     PIDchasis();
-    capuchaPIDinit();
 
     AnguloCapuchaConfig = 0;
 
@@ -213,7 +242,7 @@ public class Robot extends TimedRobot {
     Intake();
     returnHome();
     climbler();
-    anguloyvelocidad();
+    anguloyvelocidadteleop();
 
   }
 
@@ -221,6 +250,8 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     reiniciarSensores();
     desactivartodo();
+    timer.reset();
+
   }
 
   @Override
@@ -380,11 +411,11 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("distancia?", distmeters);
 
-    if (distmeters <= 3) {
+    if (distmeters <= 4) {
       chasis.arcadeDrive(0, -0.5);
     }
 
-    if (distmeters >= 3 && distmeters <= 2.05) {
+    if (distmeters >= 4 && distmeters <= 2.05) {
       chasis.arcadeDrive(0, 0);
     }
 
@@ -442,7 +473,7 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERLEFT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
         Constants.KPIDShooter.kTimeoutMs);
 
-    MOTORSHOOTERLEFT.configOpenloopRamp(2);
+    MOTORSHOOTERLEFT.configOpenloopRamp(1.2);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
@@ -538,7 +569,7 @@ public class Robot extends TimedRobot {
     }
     if (JoystickDriver2.getPOV() == Kxbox.POV.abajo) {
 
-      MOTORCLIMBER.set(0.4);
+      MOTORCLIMBER.set(0.7);
     } else if (JoystickDriver2.getPOV() == -1) {
       MOTORCLIMBER.set(0);
     }
@@ -568,53 +599,8 @@ public class Robot extends TimedRobot {
     }
   }
 
-  public void capuchaPIDinit() {
-    /* Factory Default all hardware to prevent unexpected behaviour */
-    MOTORCAPUCHA.configFactoryDefault();
 
-    /* Config sensor used for Primary PID [Velocity] */
-    MOTORCAPUCHA.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative,
-        Constants.KPIDCapucha.kPIDLoopIdx,
-        Constants.KPIDCapucha.kTimeoutMs);
-
-    /**
-     * Phase sensor accordingly.
-     * Positive Sensor Reading should match Green (blinking) Leds on Talon
-     */
-    MOTORCAPUCHA.setSensorPhase(true);
-
-    /* Config the peak and nominal outputs */
-    MOTORCAPUCHA.configNominalOutputForward(0, Constants.KPIDCapucha.kTimeoutMs);
-    MOTORCAPUCHA.configNominalOutputReverse(0, Constants.KPIDCapucha.kTimeoutMs);
-    MOTORCAPUCHA.configPeakOutputForward(1, Constants.KPIDCapucha.kTimeoutMs);
-    MOTORCAPUCHA.configPeakOutputReverse(-1, Constants.KPIDCapucha.kTimeoutMs);
-    /* Config the Velocity closed loop gains in slot0 */
-    MOTORCAPUCHA.config_kF(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kF,
-        Constants.KPIDCapucha.kTimeoutMs);
-    MOTORCAPUCHA.config_kP(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kP,
-        Constants.KPIDCapucha.kTimeoutMs);
-    MOTORCAPUCHA.config_kI(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kI,
-        Constants.KPIDCapucha.kTimeoutMs);
-    MOTORCAPUCHA.config_kD(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kD,
-        Constants.KPIDCapucha.kTimeoutMs);
-
-  }
-
-  public void capuchaPIDteleop(double rpmcapucha) {
-
-    // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
-    double rpmconve = KPIDShooter.torpm * rpmcapucha;
-    double valor = -1 * rpmconve;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
-
-    SmartDashboard.putNumber("conv", rpmconve);
-
-    double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
-    MOTORCAPUCHA.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
-    _sbshoot.setLength(0);
-
-  }
-
-  public void anguloyvelocidad() {
+  public void anguloyvelocidadteleop() {
 
     // Apuntar
     if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.5) {
@@ -626,15 +612,14 @@ public class Robot extends TimedRobot {
 
     // Disparar
 
-
-    if(JoystickDriver2.getRawButton(Kxbox.BOTONES.LB)&&limitindexer.get()==true){
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) && limitindexer.get() == true) {
 
       MOTORINDEXER.set(0.3);
 
-    }else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
+    } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
 
       MOTORINDEXER.set(0.5);
-    } else  {
+    } else {
       MOTORINDEXER.set(0);
     }
 
@@ -697,6 +682,23 @@ public class Robot extends TimedRobot {
 
   }
 
+  public void anguloyvelocidadautonomo() {
+
+    
+    // capucha
+    if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
+
+      MOTORCAPUCHA.set(0.3);
+    } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
+
+      MOTORCAPUCHA.set(0);
+    } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
+
+      MOTORCAPUCHA.set(-0.3);
+
+    }
+  }
+
   public void PIDchasis() {
     MOTORD1ENC.configFactoryDefault();
     MOTORD2.configFactoryDefault();
@@ -722,7 +724,5 @@ public class Robot extends TimedRobot {
     MOTORI5.configOpenloopRamp(0.15);
     MOTORI6.configOpenloopRamp(0.15);
   }
-
-
 
 }

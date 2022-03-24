@@ -1,4 +1,4 @@
-
+//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -12,6 +12,10 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -28,7 +32,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Controles;
 import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
@@ -77,6 +80,7 @@ public class Robot extends TimedRobot {
   // INDEXER //
   WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
   DigitalInput limitindexer = new DigitalInput(Constants.LimitSwitches.indexer);
+  Boolean INDEXERSTATUS = false;
 
   // CAPUCHA //
   WPI_TalonSRX MOTORCAPUCHA = new WPI_TalonSRX(Motores.Capucha.KMOTORCAPUCHA);
@@ -115,10 +119,29 @@ public class Robot extends TimedRobot {
   double capucha_angulo;
   double anguloFinal;
 
-//TIEMPOS PARA AUTONOMO
+  // TIEMPOS PARA AUTONOMO
 
-Timer timer=new Timer();
-boolean iniciotaxi=false;
+  Timer timer = new Timer();
+
+
+  // PATHVIEWER
+
+  DifferentialDriveOdometry m_odometry;
+
+  public static final double ksVolts = 0.22;
+  public static final double kvVoltSecondsPerMeter = 1.98;
+  public static final double kaVoltSecondsSquaredPerMeter = 0.2;
+
+  public static final double kTrackwidthMeters = 0.69;
+  public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
+
+  public static final double kPDriveVel = 8.5;
+
+  public static final double kMaxSpeedMetersPerSecond = 3;
+  public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+
+  public static final double kRamseteB = 2;
+  public static final double kRamseteZeta = 0.7;
 
   /*
    *
@@ -135,6 +158,7 @@ boolean iniciotaxi=false;
 
   @Override
   public void robotPeriodic() {
+
 
     resetLimitSwitch();
     // Calculos
@@ -181,36 +205,14 @@ boolean iniciotaxi=false;
     reiniciarSensores();
     desactivartodo();
     timer.reset();
-    ShooterPID(velocidadesShooter.fender);
-    AnguloCapuchaConfig = 9;
 
-    Timer.delay(2);
-
-    MOTORINDEXER.set(0.5);
-
-    Timer.delay(2);
-
-    MOTORSHOOTERLEFT.set(0);
-    MOTORSHOOTERRIGHT.set(0);
-    MOTORINDEXER.set(0);
-    Timer.delay(0.5);
-
-    iniciotaxi=true;
-
-  
 
 
   }
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-anguloyvelocidadautonomo();
-
-if(iniciotaxi==true){
-
-AutonomoTaxi();
-
-}
+   
 
   }
 
@@ -424,12 +426,14 @@ AutonomoTaxi();
     }
 
     double direccionx = navx.getDisplacementX();
-    double direcciony = navx.getDisplacementX();
+    double direcciony = navx.getDisplacementY();
     double angulo = navx.getAngle();
 
-    SmartDashboard.putNumber("Coordenada x", direccionx);
-    SmartDashboard.putNumber("Coordenada y", direcciony);
-    SmartDashboard.putNumber("angulo", angulo);
+    /*
+     * SmartDashboard.putNumber("Coordenada x", direccionx);
+     * SmartDashboard.putNumber("Coordenada y", direcciony);
+     * SmartDashboard.putNumber("angulo", angulo);
+     */
 
     if (distmeters <= 3 && angulo <= 5) {
       chasis.arcadeDrive(-0.5, 0.7);
@@ -599,7 +603,6 @@ AutonomoTaxi();
     }
   }
 
-
   public void anguloyvelocidadteleop() {
 
     // Apuntar
@@ -682,9 +685,8 @@ AutonomoTaxi();
 
   }
 
-  public void anguloyvelocidadautonomo() {
+  public void anguloautonomo() {
 
-    
     // capucha
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
 
@@ -697,6 +699,12 @@ AutonomoTaxi();
       MOTORCAPUCHA.set(-0.3);
 
     }
+  }
+
+  public void velocidadshootautonomo() {
+
+    ShooterPID(velocidadesShooter.velocidad);
+
   }
 
   public void PIDchasis() {

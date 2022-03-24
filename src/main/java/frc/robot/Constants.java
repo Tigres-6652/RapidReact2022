@@ -40,7 +40,7 @@ public class Constants {
 
         public static final class Climber { // Motores
 
-            public static int KMOTORCLIMBER = 13;
+            public static int KMOTORCLIMBER = 20;
         }
 
     }

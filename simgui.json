@@ -1,5 +1,102 @@
 {
   "HALProvider": {
+    "Other Devices": {
+      "Talon FX[7]/Fwd Limit": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[7]/Rev Limit": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[8]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[8]/Fwd Limit": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[8]/Integrated Sensor": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX[8]/Rev Limit": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[10]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[10]/Analog In": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[10]/Pulse Width Input": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[10]/Quad Encoder": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[1]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[1]/Analog In": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[1]/Fwd Limit": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[1]/Pulse Width Input": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[1]/Quad Encoder": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[1]/Rev Limit": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[2]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon SRX[2]/Analog In": {
+        "header": {
+          "open": true
+        }
+      },
+      "Victor SPX[11]": {
+        "header": {
+          "open": true
+        }
+      }
+    },
     "Solenoids": {
       "0": {
         "header": {
@@ -15,12 +112,17 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
+      "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[2]": "Digital Input",
+      "/LiveWindow/Ungrouped/Talon FX [7]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [8]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [10]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [11]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [12]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [7]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [8]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [9]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Victor SPX [11]": "Motor Controller",
       "/LiveWindow/Ungrouped/Victor SPX [9]": "Motor Controller",
       "/LiveWindow/Ungrouped/navX-Sensor[4]": "Gyro"
     },

@@ -633,10 +633,15 @@ chasis.arcadeDrive(0, 0);    }
     }
 
     // Disparar
-    if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
+    
+    if(JoystickDriver2.getRawButton(Kxbox.BOTONES.LB)&&limitindexer.get()==true){
+
+      MOTORINDEXER.set(0.3);
+
+    }else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
 
       MOTORINDEXER.set(0.5);
-    } else {
+    } else  {
       MOTORINDEXER.set(0);
     }
 

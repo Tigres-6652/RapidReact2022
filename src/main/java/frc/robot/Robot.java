@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -32,6 +33,7 @@ import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
+import frc.robot.Constants.Motores.Chasis;
 import edu.wpi.first.cameraserver.CameraServer;
 
 public class Robot extends TimedRobot {
@@ -123,7 +125,6 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     reiniciarSensores();
     CameraServer.startAutomaticCapture();
-    
 
   }
 
@@ -161,18 +162,41 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
 
     SmartDashboard.putNumber("capucha test", AnguloCapuchaConfig);
+
+    // timer
+
+    Timer timer = new Timer();
   }
 
   @Override
   public void autonomousInit() {
     reiniciarSensores();
     desactivartodo();
+    falconpidConfig();
 
   }
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-    //AutonomoTaxi();
+    if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 11) {
+      ShooterPID(velocidadesShooter.fender);
+
+    } else {
+      MOTORSHOOTERLEFT.set(0);
+      MOTORSHOOTERRIGHT.set(0);
+    }
+
+    if (Timer.getMatchTime() <= 13.5 && Timer.getMatchTime() >= 11) {
+      MOTORINDEXER.set(0.4);
+    } else {
+      MOTORINDEXER.set(0);
+    }
+
+    if (Timer.getMatchTime() <= 11 && Timer.getMatchTime() >= 6) {
+AutonomoTaxi();    
+} else {
+chasis.arcadeDrive(0, 0);    }
+
   }
 
   @Override
@@ -181,10 +205,10 @@ public class Robot extends TimedRobot {
     falconpidConfig();
     reiniciarSensores();
     desactivartodo();
-    //PIDchasis();
+    // PIDchasis();
     capuchaPIDinit();
 
-    AnguloCapuchaConfig=0;
+    AnguloCapuchaConfig = 0;
 
   }
 
@@ -206,9 +230,6 @@ public class Robot extends TimedRobot {
     climbler();
     anguloyvelocidad();
 
-
-
-
   }
 
   @Override
@@ -228,8 +249,6 @@ public class Robot extends TimedRobot {
     }
   }
 
-  
-
   @Override
   public void testInit() {
 
@@ -240,8 +259,8 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
 
-ShooterPID(-1500);
-}
+    ShooterPID(-1500);
+  }
 
   /*
    *
@@ -255,6 +274,8 @@ ShooterPID(-1500);
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
     // Mas adelante cambiar esto al driver secundario
+    COMPRESOR.enableDigital();
+
     if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.boton_con_lineas)) {
       if (statusrobot.compresorState) {
         COMPRESOR.enableDigital();
@@ -295,7 +316,6 @@ ShooterPID(-1500);
       PISTINTAKE.set(Value.kForward);
       MOTORINTAKE.set(0.45);
 
-
     }
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.X) == true) {
@@ -316,7 +336,6 @@ ShooterPID(-1500);
 
     }
 
-
   }
 
   public void desactivartodo() {
@@ -332,7 +351,6 @@ ShooterPID(-1500);
     MOTORCAPUCHA.set(0);
     MOTORCLIMBER.set(0);
 
-
   }
 
   public void reiniciarSensores() {
@@ -344,7 +362,7 @@ ShooterPID(-1500);
     COMPRESOR.disable();
     statusrobot.IntakeState = false;
     statusrobot.compresorState = false;
-    velocidadesShooter.velocidad=0;
+    velocidadesShooter.velocidad = 0;
 
     MOTORCAPUCHA.set(0);
 
@@ -443,11 +461,6 @@ ShooterPID(-1500);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
-
-
-
-
-    
     /* Factory Default all hardware to prevent unexpected behaviour */
     MOTORSHOOTERRIGHT.configFactoryDefault();
 
@@ -468,14 +481,14 @@ ShooterPID(-1500);
     /* Config the Velocity closed loop gains in slot0 */
     MOTORSHOOTERRIGHT.config_kF(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kF,
         Constants.KPIDShooter.kTimeoutMs);
-        MOTORSHOOTERRIGHT.config_kP(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kP,
+    MOTORSHOOTERRIGHT.config_kP(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kP,
         Constants.KPIDShooter.kTimeoutMs);
-        MOTORSHOOTERRIGHT.config_kI(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kI,
+    MOTORSHOOTERRIGHT.config_kI(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kI,
         Constants.KPIDShooter.kTimeoutMs);
-        MOTORSHOOTERRIGHT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
+    MOTORSHOOTERRIGHT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
         Constants.KPIDShooter.kTimeoutMs);
 
-        MOTORSHOOTERRIGHT.configOpenloopRamp(1.4);
+    MOTORSHOOTERRIGHT.configOpenloopRamp(1.4);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
 
@@ -550,11 +563,7 @@ ShooterPID(-1500);
   public void returnHome() {
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
-      if (limitcapucha.get() == true) {
-        MOTORCAPUCHA.set(-0.4);
-      } else {
-        MOTORCAPUCHA.set(0);
-      }
+      AnguloCapuchaConfig = 0;
     }
   }
 
@@ -632,11 +641,11 @@ ShooterPID(-1500);
 
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
 
-MOTORCAPUCHA.set(0.3);
-    }else if ((anguloFinal >= (-AnguloCapuchaConfig - 1 )) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
+      MOTORCAPUCHA.set(0.3);
+    } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
 
       MOTORCAPUCHA.set(0);
-    }else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
+    } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
 
       MOTORCAPUCHA.set(-0.3);
 
@@ -648,22 +657,24 @@ MOTORCAPUCHA.set(0.3);
       velocidadesShooter.velocidad = velocidadesShooter.fender; // 4650
       AnguloCapuchaConfig = 9;
 
-      
-        /*if(anguloFinal <= 8.5){
-          MOTORCAPUCHA.set(0.3); }else{
-            MOTORCAPUCHA.set(0); }*/
-       
+      /*
+       * if(anguloFinal <= 8.5){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
+
     }
 
     // Tarmac 1.84m
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
       AnguloCapuchaConfig = 20;
       velocidadesShooter.velocidad = velocidadesShooter.tarmac;
-      
-       /* if(anguloFinal <= 20){
-          MOTORCAPUCHA.set(0.3); }else{
-        MOTORCAPUCHA.set(0); }*/
-       
+
+      /*
+       * if(anguloFinal <= 20){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
 
     }
 
@@ -673,16 +684,15 @@ MOTORCAPUCHA.set(0.3);
       AnguloCapuchaConfig = 25;
 
       velocidadesShooter.velocidad = velocidadesShooter.launchpad;
-      
-        /*if(anguloFinal <= 25){
-          MOTORCAPUCHA.set(0.3); }else{
-            MOTORCAPUCHA.set(0);
-        }*/
-       
+
+      /*
+       * if(anguloFinal <= 25){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0);
+       * }
+       */
 
     }
-
-
 
   }
 
@@ -690,7 +700,7 @@ MOTORCAPUCHA.set(0.3);
 
   }
 
-  public void PIDchasis(){
+  public void PIDchasis() {
 
     MOTORD1ENC.configFactoryDefault();
     MOTORI4ENC.configFactoryDefault();

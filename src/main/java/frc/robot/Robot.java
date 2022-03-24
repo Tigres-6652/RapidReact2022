@@ -9,6 +9,9 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -34,6 +37,7 @@ import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
 import frc.robot.Constants.Motores.Chasis;
+import frc.robot.Constants.Motores.Climber;
 import edu.wpi.first.cameraserver.CameraServer;
 
 public class Robot extends TimedRobot {
@@ -83,7 +87,7 @@ public class Robot extends TimedRobot {
   double AnguloCapuchaConfig;
 
   // CLIMBER //
-  WPI_TalonSRX MOTORCLIMBER = new WPI_TalonSRX(Motores.Climber.KMOTORCLIMBER);
+  CANSparkMax MOTORCLIMBER =new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
 
   // LIMELIGHT //////
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -274,7 +278,6 @@ chasis.arcadeDrive(0, 0);    }
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
     // Mas adelante cambiar esto al driver secundario
-    COMPRESOR.enableDigital();
 
     if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.boton_con_lineas)) {
       if (statusrobot.compresorState) {
@@ -547,14 +550,14 @@ chasis.arcadeDrive(0, 0);    }
 
   public void climbler() { // Probar
 
-    if (JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
+    if (JoystickDriver1.getPOV() == Kxbox.POV.arriba) {
+
+      MOTORCLIMBER.set(0.7);
+    }
+    if (JoystickDriver1.getPOV() == Kxbox.POV.abajo) {
 
       MOTORCLIMBER.set(-1);
-    }
-    if (JoystickDriver2.getPOV() == Kxbox.POV.abajo) {
-
-      MOTORCLIMBER.set(0.4);
-    } else if (JoystickDriver2.getPOV() == -1) {
+    } else if (JoystickDriver1.getPOV() == -1) {
       MOTORCLIMBER.set(0);
     }
 
@@ -669,6 +672,17 @@ chasis.arcadeDrive(0, 0);    }
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
       AnguloCapuchaConfig = 20;
       velocidadesShooter.velocidad = velocidadesShooter.tarmac;
+
+      /*
+       * if(anguloFinal <= 20){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
+
+    }
+
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
+      AnguloCapuchaConfig = 0;
 
       /*
        * if(anguloFinal <= 20){

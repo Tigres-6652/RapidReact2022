@@ -76,6 +76,7 @@ public class Robot extends TimedRobot {
 
   // INDEXER //
   WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
+  DigitalInput limitindexer=new DigitalInput(Constants.LimitSwitches.indexer);
 
   // CAPUCHA //
   WPI_TalonSRX MOTORCAPUCHA = new WPI_TalonSRX(Motores.Capucha.KMOTORCAPUCHA);

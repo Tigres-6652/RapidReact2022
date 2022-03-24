@@ -97,6 +97,7 @@ public class Constants {
     public static final class LimitSwitches {
 
         public static int capucha = 0;
+        public static int indexer=2;
         
 
     }

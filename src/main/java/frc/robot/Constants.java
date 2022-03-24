@@ -84,7 +84,7 @@ public class Constants {
 
     public static final class LimeLight {
 
-        public static double kp = -0.02;
+        public static double kp = -0.035;
         // how many degrees back is your limelight rotated from perfectly vertical
         public static double AnguloMontadoGrados = 25.0;
         // distance from the center of the Limelight lens to the floor

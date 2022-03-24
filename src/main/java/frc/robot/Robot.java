@@ -519,11 +519,11 @@ chasis.arcadeDrive(0, 0);    }
     double ajusteGiro = 0.0f;
     float min_command = 0.05f;
 
-    if (x > 1.0) {
+    if (x > 0.5) {
 
       ajusteGiro = Constants.LimeLight.kp * x - min_command;
 
-    } else if (x < 1.0) {
+    } else if (x < 0.5) {
 
       ajusteGiro = Constants.LimeLight.kp * x + min_command;
 

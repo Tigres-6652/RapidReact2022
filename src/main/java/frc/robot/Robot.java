@@ -12,10 +12,12 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -40,6 +42,7 @@ import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
+
 import frc.robot.Constants.Motores.Climber;
 import edu.wpi.first.cameraserver.CameraServer;
 
@@ -80,7 +83,9 @@ public class Robot extends TimedRobot {
   // INDEXER //
   WPI_VictorSPX MOTORINDEXER = new WPI_VictorSPX(Motores.Indexer.KMOTORINDEXER);
   DigitalInput limitindexer = new DigitalInput(Constants.LimitSwitches.indexer);
+
   Boolean INDEXERSTATUS = false;
+
 
   // CAPUCHA //
   WPI_TalonSRX MOTORCAPUCHA = new WPI_TalonSRX(Motores.Capucha.KMOTORCAPUCHA);
@@ -189,11 +194,19 @@ public class Robot extends TimedRobot {
      * SmartDashboard.putNumber("LL Y Value", y);
      * SmartDashboard.putNumber("LL X Area", area);
      */
+    SmartDashboard.putNumber("LL Y Value", y);
 
     SmartDashboard.putNumber("deegree", anguloFinal);
     SmartDashboard.putNumber("capucha", capuchavalor);
     SmartDashboard.putBoolean("Limit", limitcapucha.get());
     SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
+
+    SmartDashboard.putNumber("capucha test", AnguloCapuchaConfig);
+
+    SmartDashboard.putNumber("encorderDER", MOTORD1ENC.getSelectedSensorPosition());
+
+      SmartDashboard.putNumber("encorderizq", MOTORI4ENC.getSelectedSensorPosition());
+      SmartDashboard.putNumber("angle", navx.getAngle());
 
     SmartDashboard.putBoolean("testindexer", limitindexer.get());
 
@@ -204,6 +217,9 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     reiniciarSensores();
     desactivartodo();
+    falconpidConfig();
+
+    capuchaPIDinit();
     timer.reset();
 
 
@@ -212,6 +228,29 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() { // Autonomo
+    ajusteDeTiroautonomo();
+    if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
+      ShooterPID(-5000);
+      AnguloCapuchaConfig = 6.8;
+
+    } else {
+      MOTORSHOOTERLEFT.set(0);
+      MOTORSHOOTERRIGHT.set(0);
+    }
+
+    if (Timer.getMatchTime() <= 12 && Timer.getMatchTime() >= 9.8) {
+      MOTORINDEXER.set(0.4);
+    } else {
+      MOTORINDEXER.set(0);
+    }
+
+    if (Timer.getMatchTime() <= 9 ) {
+      AutonomoTaxi();
+    } 
+    }
+
+  
+=======
    
 
   }
@@ -222,6 +261,8 @@ public class Robot extends TimedRobot {
     falconpidConfig();
     reiniciarSensores();
     desactivartodo();
+    // PIDchasis();
+    capuchaPIDinit();
     PIDchasis();
 
     AnguloCapuchaConfig = 0;
@@ -244,7 +285,10 @@ public class Robot extends TimedRobot {
     Intake();
     returnHome();
     climbler();
+    anguloyvelocidad();
+
     anguloyvelocidadteleop();
+
 
   }
 
@@ -252,6 +296,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     reiniciarSensores();
     desactivartodo();
+    navx.reset();
     timer.reset();
 
   }
@@ -292,6 +337,7 @@ public class Robot extends TimedRobot {
 
     // SE PRENDE EL COMPRESOR CON EL BOTON "B"
     // Mas adelante cambiar esto al driver secundario
+
     if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.boton_con_lineas)) {
       if (statusrobot.compresorState) {
         COMPRESOR.enableDigital();
@@ -366,6 +412,7 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERRIGHT.set(0);
     MOTORCAPUCHA.set(0);
     MOTORCLIMBER.set(0);
+
     AnguloCapuchaConfig = 0;
 
   }
@@ -375,11 +422,12 @@ public class Robot extends TimedRobot {
     // Reset de sensores de encoders, navx.
     MOTORD1ENC.setSelectedSensorPosition(0);
     MOTORI4ENC.setSelectedSensorPosition(0);
-    navx.reset();
     COMPRESOR.disable();
     statusrobot.IntakeState = false;
     statusrobot.compresorState = false;
     velocidadesShooter.velocidad = 0;
+    AnguloCapuchaConfig = 0;
+
 
     MOTORCAPUCHA.set(0);
     AnguloCapuchaConfig = 0;
@@ -413,6 +461,11 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("distancia?", distmeters);
 
+    if (distmeters <= 2.4) {
+      chasis.arcadeDrive(0, -0.5);
+    }
+
+    if (distmeters >= 2.41 && distmeters <= 2.6) {
     if (distmeters <= 4) {
       chasis.arcadeDrive(0, -0.5);
     }
@@ -421,30 +474,35 @@ public class Robot extends TimedRobot {
       chasis.arcadeDrive(0, 0);
     }
 
-    if (distmeters >= 3.1) {
-      chasis.arcadeDrive(0, 0.3);
+    if (distmeters >= 2.61) {
+      chasis.arcadeDrive(0, 0.5);
     }
 
     double direccionx = navx.getDisplacementX();
     double direcciony = navx.getDisplacementY();
     double angulo = navx.getAngle();
 
+   /* SmartDashboard.putNumber("Coordenada x", direccionx);
+    SmartDashboard.putNumber("Coordenada y", direcciony);
+    SmartDashboard.putNumber("angulo", angulo);*/
     /*
      * SmartDashboard.putNumber("Coordenada x", direccionx);
      * SmartDashboard.putNumber("Coordenada y", direcciony);
      * SmartDashboard.putNumber("angulo", angulo);
      */
 
-    if (distmeters <= 3 && angulo <= 5) {
+    /*
+      if (distmeters <= 3 && angulo <= 5) {
       chasis.arcadeDrive(-0.5, 0.7);
-    }
-    if (distmeters <= 3 && angulo >= 5) {
+      }
+      if (distmeters <= 3 && angulo >= 5) {
       chasis.arcadeDrive(0.4, 0.7);
-    }
-
-    if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
+      }
+      
+      if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
       chasis.arcadeDrive(-0, 0.7);
-    }
+     }*/
+     
 
   }
 
@@ -477,6 +535,7 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERLEFT.config_kD(Constants.KPIDShooter.kPIDLoopIdx, Constants.KPIDShooter.kGains_Velocit.kD,
         Constants.KPIDShooter.kTimeoutMs);
 
+    MOTORSHOOTERLEFT.configOpenloopRamp(1.5);
     MOTORSHOOTERLEFT.configOpenloopRamp(1.2);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
@@ -530,11 +589,17 @@ public class Robot extends TimedRobot {
   }
 
   public void ajustedegiro() { // Probar
+    double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
 
     double x = tx.getDouble(0.0);
     double ajusteGiro = 0.0f;
-    float min_command = 0.05f;
+    float min_command = 0.03f;
 
+    if (x > 0.2) {
+
+      ajusteGiro = Constants.LimeLight.kp * x - min_command;
+
+    } else if (x < 0.2) {
     if (x > 0.5) {
 
       ajusteGiro = Constants.LimeLight.kp * x - min_command;
@@ -544,7 +609,7 @@ public class Robot extends TimedRobot {
       ajusteGiro = Constants.LimeLight.kp * x + min_command;
 
     }
-    chasis.arcadeDrive(ajusteGiro, 0);
+    chasis.arcadeDrive(ajusteGiro, -velocidad);
 
   }
 
@@ -569,9 +634,11 @@ public class Robot extends TimedRobot {
 
     if (JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
 
-      MOTORCLIMBER.set(-1);
+      MOTORCLIMBER.set(0.7);
     }
     if (JoystickDriver2.getPOV() == Kxbox.POV.abajo) {
+
+      MOTORCLIMBER.set(-1);
 
       MOTORCLIMBER.set(0.7);
     } else if (JoystickDriver2.getPOV() == -1) {
@@ -583,11 +650,7 @@ public class Robot extends TimedRobot {
   public void returnHome() {
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
-      if (limitcapucha.get() == true) {
-        MOTORCAPUCHA.set(-0.4);
-      } else {
-        MOTORCAPUCHA.set(0);
-      }
+      AnguloCapuchaConfig = 0;
     }
   }
 
@@ -615,13 +678,20 @@ public class Robot extends TimedRobot {
 
     // Disparar
 
+
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) && limitindexer.get() == true) {
 
       MOTORINDEXER.set(0.3);
 
     } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
 
-      MOTORINDEXER.set(0.5);
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) && limitindexer.get() == true) {
+
+      MOTORINDEXER.set(0.3);
+
+    } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
+
+      MOTORINDEXER.set(0.3);
     } else {
       MOTORINDEXER.set(0);
     }
@@ -644,7 +714,14 @@ public class Robot extends TimedRobot {
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.B)) {
 
       velocidadesShooter.velocidad = velocidadesShooter.fender; // 4650
-      AnguloCapuchaConfig = 9;
+      AnguloCapuchaConfig = 25;
+
+      /*
+       * if(anguloFinal <= 8.5){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
+
 
       /*
        * if(anguloFinal <= 8.5){
@@ -667,6 +744,18 @@ public class Robot extends TimedRobot {
 
     }
 
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
+      AnguloCapuchaConfig = 0;
+
+      /*
+       * if(anguloFinal <= 20){
+       * MOTORCAPUCHA.set(0.3); }else{
+       * MOTORCAPUCHA.set(0); }
+       */
+
+
+    }
+
     // Launch Pad
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.X)) {
 
@@ -685,6 +774,8 @@ public class Robot extends TimedRobot {
 
   }
 
+  public void ajusteDeTiroautonomo() {
+
   public void anguloautonomo() {
 
     // capucha
@@ -699,8 +790,14 @@ public class Robot extends TimedRobot {
       MOTORCAPUCHA.set(-0.3);
 
     }
+
+
+      MOTORCAPUCHA.set(-0.3);
+
+    }
   }
 
+  public void PIDchasis() {
   public void velocidadshootautonomo() {
 
     ShooterPID(velocidadesShooter.velocidad);

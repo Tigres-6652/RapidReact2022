@@ -84,7 +84,11 @@ public class Constants {
 
     public static final class LimeLight {
 
+
+        public static double kp = -0.030;
+
         public static double kp = -0.01f;
+
         // how many degrees back is your limelight rotated from perfectly vertical
         public static double AnguloMontadoGrados = 25.0;
         // distance from the center of the Limelight lens to the floor
@@ -98,8 +102,10 @@ public class Constants {
 
         public static int capucha = 0;
 
+
         public static int indexer=2;
-        
+       
+      
 
     }
 
@@ -188,9 +194,9 @@ public class Constants {
 
     public static final class velocidadesShooter {
 
-        public static final double fender = -5000;
-        public static final double tarmac = -5250;
-        public static final double launchpad = -6050;
+        public static final double fender = -2000;
+        public static final double tarmac = -5150;
+        public static final double launchpad = -5850;
         public static double velocidad;
     }
 

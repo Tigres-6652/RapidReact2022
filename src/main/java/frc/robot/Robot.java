@@ -9,8 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
@@ -21,6 +20,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -88,7 +88,9 @@ public class Robot extends TimedRobot {
   double AnguloCapuchaConfig;
 
   // CLIMBER //
-  CANSparkMax MOTORCLIMBER = new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
+  //CANSparkMax MOTORCLIMBER = new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
+
+  PowerDistribution pdp = new PowerDistribution();
 
   // LIMELIGHT //////
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -150,30 +152,26 @@ public class Robot extends TimedRobot {
     anguloFinal = -1 * capuchavalor / ktick2Degree;
 
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
-    SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
+   // SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
     SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", !statusrobot.compresorState);
-    SmartDashboard.putNumber("RPM shooter", velocidadesShooter.velocidad * -1);
+    SmartDashboard.putNumber("RPM shooter", MOTORSHOOTERRIGHT.getSelectedSensorVelocity()*-1*10*60/2048);
+    SmartDashboard.putNumber("Current Shooter", (pdp.getCurrent(12)+pdp.getCurrent(3))/2);
+    SmartDashboard.putBoolean("Reset Capucha", limitcapucha.get());
+    SmartDashboard.putNumber("Valor Capucha", MOTORCAPUCHA.getSelectedSensorPosition());
+    SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
+  
+    
     /*
      * SmartDashboard.putNumber("velocidad", velocidadtest);
      * SmartDashboard.putNumber("LL X Value", x);
      * SmartDashboard.putNumber("LL Y Value", y);
      * SmartDashboard.putNumber("LL X Area", area);
-     */
-    SmartDashboard.putNumber("LL Y Value", y);
-
-    SmartDashboard.putNumber("deegree", anguloFinal);
-    SmartDashboard.putNumber("capucha", capuchavalor);
-    SmartDashboard.putBoolean("Limit", limitcapucha.get());
-    SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
-
-    SmartDashboard.putNumber("capucha test", AnguloCapuchaConfig);
-
-    SmartDashboard.putNumber("encorderDER", MOTORD1ENC.getSelectedSensorPosition());
-
-      SmartDashboard.putNumber("encorderizq", MOTORI4ENC.getSelectedSensorPosition());
-      SmartDashboard.putNumber("angle", navx.getAngle());
-
+     * SmartDashboard.putNumber("LL Y Value", y);
+     * SmartDashboard.putNumber("deegree", anguloFinal);
+     * SmartDashboard.putNumber("capucha", capuchavalor);
+     * SmartDashboard.putNumber("angle", navx.getAngle());
+    */
   }
 
   @Override
@@ -181,7 +179,6 @@ public class Robot extends TimedRobot {
     reiniciarSensores();
     desactivartodo();
     falconpidConfig();
-
     capuchaPIDinit();
 
   }
@@ -205,7 +202,7 @@ public class Robot extends TimedRobot {
     }
 
     if (Timer.getMatchTime() <= 9 ) {
-      AutonomoTaxi();
+     // AutonomoTaxi();
     } 
     }
 
@@ -239,8 +236,12 @@ public class Robot extends TimedRobot {
     compresor();
     Intake();
     returnHome();
-    climbler();
+    //climbler();
     anguloyvelocidad();
+
+    if(JoystickDriver2.getRawButton(Kxbox.BOTONES.boton_con_lineas)){
+      MOTORCAPUCHA.set(JoystickDriver2.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y));
+    }
 
   }
 
@@ -273,7 +274,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
 
-    ShooterPID(-1500);
+    ShooterPID(-5000);
   }
 
   /*
@@ -362,7 +363,7 @@ public class Robot extends TimedRobot {
     MOTORSHOOTERLEFT.set(0);
     MOTORSHOOTERRIGHT.set(0);
     MOTORCAPUCHA.set(0);
-    MOTORCLIMBER.set(0);
+    //MOTORCLIMBER.set(0);
 
   }
 
@@ -560,7 +561,7 @@ public class Robot extends TimedRobot {
     double distance_adjust = Constants.LimeLight.kp * distance_error;
     chasis.arcadeDrive(ajusteGiro, distance_adjust);
   }
-
+/*
   public void climbler() { // Probar
 
     if (JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
@@ -575,6 +576,7 @@ public class Robot extends TimedRobot {
     }
 
   }
+*/
 
   public void returnHome() {
 

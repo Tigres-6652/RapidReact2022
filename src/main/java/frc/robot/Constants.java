@@ -150,7 +150,7 @@ public class Constants {
         public static final int kSlotIdx = 0;
         public static final int kPIDLoopIdx = 0;
         public static final int kTimeoutMs = 30;
-        public final static GainsShoot kGains_Velocit = new GainsShoot(0.1, 0.001, 5, 1023.0 / 20660.0, 300, 1.00);
+        public final static GainsShoot kGains_Velocit = new GainsShoot(0.003, 0.000, 0.005, 1023.0 / 20660.0, 300, 1.00);
 
         // public static double rpmtotal; //Variable para controlar las rpm
 

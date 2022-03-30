@@ -98,20 +98,15 @@ public class Robot extends TimedRobot {
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
 
-  double targetOffsetAngle_Vertical = ty.getDouble(0.0);
 
   // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
   // perfectamente vertical?
-  double limelightMountAngleDegrees = 25.0;
-
+  double anguloInclinacionLL = 39.5;
   // distancia desde el centro de la lente Limelight hasta el suelo
-  double limelightHeightInches = 20.0;
-
+  double alturaAlPisoPugadasLL = 22.4;
   // distancia del objetivo al suelo
-  double goalHeightInches = 103.9; // distancia hub 103.9 in
-
-  double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-  double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+  double alturaUpperPulgadas = 105.1 ; // distancia hub 103.9 in
+ 
 
   // Navx /////
   AHRS navx = new AHRS(SPI.Port.kMXP);
@@ -131,7 +126,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     reiniciarSensores();
-    CameraServer.startAutomaticCapture();
+    //CameraServer.startAutomaticCapture();
 
   }
 
@@ -139,20 +134,19 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
 
     resetLimitSwitch();
-    // Calculos
-    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightHeightInches)
-        / Math.tan(angleToGoalRadians);
-    //double velocidadtest = MOTORSHOOTERLEFT.getSelectedSensorVelocity() / 4096 * 10 * 60 * 2;
-    //double x = tx.getDouble(0.0);
-    double y = ty.getDouble(0.0);
-   /// double area = ta.getDouble(0.0);
-    double distancia_metros_limelight_a_hub = distanceFromLimelightToGoalInches * 2.54;
 
+    // Calculos
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
     capuchavalor = MOTORCAPUCHA.getSelectedSensorPosition();
     anguloFinal = -1 * capuchavalor / ktick2Degree;
+    double angleToGoalDegrees = anguloInclinacionLL + y;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
 
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
-   // SmartDashboard.putNumber("distancia a HUB", distancia_metros_limelight_a_hub);
+
     SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", !statusrobot.compresorState);
     SmartDashboard.putNumber("RPM shooter", MOTORSHOOTERRIGHT.getSelectedSensorVelocity()*-1*10*60/2048);
@@ -160,18 +154,13 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Reset Capucha", limitcapucha.get());
     SmartDashboard.putNumber("Valor Capucha", MOTORCAPUCHA.getSelectedSensorPosition());
     SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
-  
+    SmartDashboard.putNumber("Angulo Capucha", anguloFinal);
+    SmartDashboard.putNumber("LL X Value", x);
+    SmartDashboard.putNumber("LL Y Value", y);
+    SmartDashboard.putNumber("LL X Area", area);
+    SmartDashboard.putNumber("Distancia Fender", distanciaFender);
     
-    /*
-     * SmartDashboard.putNumber("velocidad", velocidadtest);
-     * SmartDashboard.putNumber("LL X Value", x);
-     * SmartDashboard.putNumber("LL Y Value", y);
-     * SmartDashboard.putNumber("LL X Area", area);
-     * SmartDashboard.putNumber("LL Y Value", y);
-     * SmartDashboard.putNumber("deegree", anguloFinal);
-     * SmartDashboard.putNumber("capucha", capuchavalor);
-     * SmartDashboard.putNumber("angle", navx.getAngle());
-    */
+    
   }
 
   @Override
@@ -223,6 +212,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() { // Teleoperado
+
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
       ajustedegiro();
     } else {
@@ -238,11 +228,6 @@ public class Robot extends TimedRobot {
     returnHome();
     //climbler();
     anguloyvelocidad();
-
-    if(JoystickDriver2.getRawButton(Kxbox.BOTONES.boton_con_lineas)){
-      MOTORCAPUCHA.set(JoystickDriver2.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y));
-    }
-
   }
 
   @Override
@@ -648,84 +633,43 @@ public class Robot extends TimedRobot {
     }
 
     // Disparar
-
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) && limitindexer.get() == true) {
-
       MOTORINDEXER.set(0.3);
-
     } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
-
       MOTORINDEXER.set(0.3);
     } else {
       MOTORINDEXER.set(0);
     }
 
-    // capucha
-
+    // Capucha
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
-
       MOTORCAPUCHA.set(0.3);
     } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
-
       MOTORCAPUCHA.set(0);
     } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
-
       MOTORCAPUCHA.set(-0.3);
-
     }
 
     // Tiro Fender
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.B)) {
-
       velocidadesShooter.velocidad = velocidadesShooter.fender; // 4650
-      AnguloCapuchaConfig = 25;
-
-      /*
-       * if(anguloFinal <= 8.5){
-       * MOTORCAPUCHA.set(0.3); }else{
-       * MOTORCAPUCHA.set(0); }
-       */
-
+      AnguloCapuchaConfig = Constants.anguloCapucha.fender;
     }
 
     // Tarmac 1.84m
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
-      AnguloCapuchaConfig = 20;
+      AnguloCapuchaConfig =  Constants.anguloCapucha.tarmac;
       velocidadesShooter.velocidad = velocidadesShooter.tarmac;
-
-      /*
-       * if(anguloFinal <= 20){
-       * MOTORCAPUCHA.set(0.3); }else{
-       * MOTORCAPUCHA.set(0); }
-       */
-
     }
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
       AnguloCapuchaConfig = 0;
-
-      /*
-       * if(anguloFinal <= 20){
-       * MOTORCAPUCHA.set(0.3); }else{
-       * MOTORCAPUCHA.set(0); }
-       */
-
     }
 
     // Launch Pad
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.X)) {
-
-      AnguloCapuchaConfig = 25;
-
+      AnguloCapuchaConfig =  Constants.anguloCapucha.launchpad;
       velocidadesShooter.velocidad = velocidadesShooter.launchpad;
-
-      /*
-       * if(anguloFinal <= 25){
-       * MOTORCAPUCHA.set(0.3); }else{
-       * MOTORCAPUCHA.set(0);
-       * }
-       */
-
     }
 
   }
@@ -733,13 +677,13 @@ public class Robot extends TimedRobot {
   public void ajusteDeTiroautonomo() {
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
 
-      MOTORCAPUCHA.set(0.3);
+      MOTORCAPUCHA.set(0.25);
     } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
 
       MOTORCAPUCHA.set(0);
     } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
 
-      MOTORCAPUCHA.set(-0.3);
+      MOTORCAPUCHA.set(-0.25);
 
     }
 

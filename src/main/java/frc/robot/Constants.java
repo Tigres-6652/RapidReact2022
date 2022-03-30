@@ -189,7 +189,15 @@ public class Constants {
 
         public static final double fender = -2000;
         public static final double tarmac = -5150;
-        public static final double launchpad = -5850;
+        public static final double launchpad = -6050;
+        public static double velocidad;
+    }
+
+    public static final class anguloCapucha {
+
+        public static final double fender = 25;
+        public static final double tarmac = 20;
+        public static final double  launchpad = 17;
         public static double velocidad;
     }
 

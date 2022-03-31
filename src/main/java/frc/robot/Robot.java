@@ -37,8 +37,7 @@ import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
 
-import frc.robot.Constants.Motores.Climber;
-import edu.wpi.first.cameraserver.CameraServer;
+
 
 public class Robot extends TimedRobot {
 
@@ -98,6 +97,8 @@ public class Robot extends TimedRobot {
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
 
+  
+
 
   // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
   // perfectamente vertical?
@@ -116,6 +117,12 @@ public class Robot extends TimedRobot {
   double capuchavalor;
   double capucha_angulo;
   double anguloFinal;
+
+
+//autonomo
+
+double KPgiro=0.0055;
+double headin;
 
   /*
    *
@@ -145,6 +152,8 @@ public class Robot extends TimedRobot {
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
     double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
 
+
+    
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
 
     SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
@@ -160,6 +169,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("LL X Area", area);
     SmartDashboard.putNumber("Distancia Fender", distanciaFender);
     
+
+  SmartDashboard.putNumber("angulochasis", navx.getAngle());
     
   }
 
@@ -174,8 +185,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-    ajusteDeTiroautonomo();
-    if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
+    //ajusteDeTiroautonomo();
+
+double error=120-navx.getAngle();
+
+chasis.arcadeDrive(-KPgiro*error,0);
+
+
+    /*if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
       ShooterPID(-5000);
       AnguloCapuchaConfig = 6.8;
 
@@ -192,7 +209,7 @@ public class Robot extends TimedRobot {
 
     if (Timer.getMatchTime() <= 9 ) {
      // AutonomoTaxi();
-    } 
+    } */
     }
 
   
@@ -214,7 +231,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() { // Teleoperado
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
-      ajustedegiro();
+      chasis_shoot_Adjust();
     } else {
       // Mover Chassis
       double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
@@ -252,14 +269,16 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
 
-    falconpidConfig();
+   // falconpidConfig();
 
   }
 
   @Override
   public void testPeriodic() {
 
-    ShooterPID(-5000);
+
+  
+    //ShooterPID(-5000);
   }
 
   /*
@@ -526,26 +545,69 @@ public class Robot extends TimedRobot {
       ajusteGiro = Constants.LimeLight.kp * x + min_command;
 
     }
-    chasis.arcadeDrive(ajusteGiro, -velocidad);
+    double y = ty.getDouble(0.0);
+    double angleToGoalDegrees = anguloInclinacionLL + y;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
 
+
+if(distanciaFender<100){
+
+  chasis.arcadeDrive(ajusteGiro, -0.5);
+
+}
+if(distanciaFender>105){
+
+  chasis.arcadeDrive(ajusteGiro, 0.5);
+}
+
+if(distanciaFender>100&&distanciaFender<104){
+chasis.arcadeDrive(ajusteGiro, 0);
+
+}
   }
 
-  public void chasis_shoot_Adjust() { // Probar
+  public void chasis_shoot_Adjust() { 
+    
     double x = tx.getDouble(0.0);
     double ajusteGiro = 0.0f;
-    float min_aim_command = 0.05f;
+    float min_command = 0.03f;
 
-    double heading_error = -tx.getDouble(0.0);
-    double distance_error = -ty.getDouble(0.0);
+    if (x > 0.2) {
 
-    if (x > 1.0) {
-      ajusteGiro = Constants.LimeLight.kp * heading_error * x - min_aim_command;
-    } else if (x < 1.0) {
-      ajusteGiro = Constants.LimeLight.kp * heading_error * x + min_aim_command;
+      ajusteGiro = Constants.LimeLight.kp * x - min_command;
+
+    } else if (x < 0.2) {
+
+      ajusteGiro = Constants.LimeLight.kp * x + min_command;
+
     }
-    double distance_adjust = Constants.LimeLight.kp * distance_error;
-    chasis.arcadeDrive(ajusteGiro, distance_adjust);
+
+
+    // Probar
+    double y = ty.getDouble(0.0);
+    double angleToGoalDegrees = anguloInclinacionLL + y;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
+
+
+if(distanciaFender<67){
+
+  chasis.arcadeDrive(ajusteGiro, -0.45);
+
+}
+if(distanciaFender>70){
+
+  chasis.arcadeDrive(ajusteGiro, 0.45);
+}
+
+if(distanciaFender>67&&distanciaFender<70){
+chasis.arcadeDrive(ajusteGiro, 0);
+
+}
   }
+
+  
 /*
   public void climbler() { // Probar
 
@@ -612,7 +674,7 @@ public class Robot extends TimedRobot {
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
     double rpmconve = KPIDShooter.torpm * rpmcapucha;
-    double valor = -1 * rpmconve;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
+    double valor = -1 * rpmconve;
 
     SmartDashboard.putNumber("conv", rpmconve);
 
@@ -692,13 +754,20 @@ public class Robot extends TimedRobot {
   public void PIDchasis() {
 
     MOTORD1ENC.configFactoryDefault();
+    MOTORD2.configFactoryDefault();
+
+    MOTORD3.configFactoryDefault();
     MOTORI4ENC.configFactoryDefault();
+    MOTORI5.configFactoryDefault();
+    MOTORI6.configFactoryDefault();
+
+
 
     MOTORD1ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     MOTORI4ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
-    MOTORD1ENC.configOpenloopRamp(0.8);
-    MOTORI4ENC.configOpenloopRamp(0.8);
+    MOTORD1ENC.configOpenloopRamp(0.0);
+    MOTORI4ENC.configOpenloopRamp(0.0);
   }
 
 }

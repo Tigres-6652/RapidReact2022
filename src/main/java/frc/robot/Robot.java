@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.Controles;
 import frc.robot.Constants.KPIDShooter;
 import frc.robot.Constants.Kxbox;
+import frc.robot.Constants.LimeLight;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
@@ -100,13 +101,6 @@ public class Robot extends TimedRobot {
   
 
 
-  // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
-  // perfectamente vertical?
-  double anguloInclinacionLL = 39.5;
-  // distancia desde el centro de la lente Limelight hasta el suelo
-  double alturaAlPisoPugadasLL = 22.4;
-  // distancia del objetivo al suelo
-  double alturaUpperPulgadas = 105.1 ; // distancia hub 103.9 in
  
 
   // Navx /////
@@ -148,9 +142,9 @@ double headin;
     double area = ta.getDouble(0.0);
     capuchavalor = MOTORCAPUCHA.getSelectedSensorPosition();
     anguloFinal = -1 * capuchavalor / ktick2Degree;
-    double angleToGoalDegrees = anguloInclinacionLL + y;
+    double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
 
 
     

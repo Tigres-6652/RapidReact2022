@@ -85,12 +85,14 @@ public class Constants {
     public static final class LimeLight {
 
         public static double kp = -0.030;
-        // how many degrees back is your limelight rotated from perfectly vertical
-        public static double AnguloMontadoGrados = 25.0;
-        // distance from the center of the Limelight lens to the floor
-        public static double limelightLensHeightInches = 20.0;
-        // distance from the target to the floor
-        public static double goalHeightInches = 60.0;
+
+  // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
+  // perfectamente vertical?
+  public static double anguloInclinacionLL = 39.5;
+  // distancia desde el centro de la lente Limelight hasta el suelo
+  public static double alturaAlPisoPugadasLL = 22.4;
+  // distancia del objetivo al suelo
+  public static double alturaUpperPulgadas = 105.1 ; // distancia hub 103.9 in
 
     }
 

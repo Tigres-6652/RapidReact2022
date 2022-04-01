@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -524,7 +523,6 @@ chasis.arcadeDrive(-KPgiro*error,0);
   }
 
   public void ajustedegiro() { // Probar
-    double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
 
     double x = tx.getDouble(0.0);
     double ajusteGiro = 0.0f;
@@ -539,26 +537,36 @@ chasis.arcadeDrive(-KPgiro*error,0);
       ajusteGiro = Constants.LimeLight.kp * x + min_command;
 
     }
+
+
+    // distancia
     double y = ty.getDouble(0.0);
-    double angleToGoalDegrees = anguloInclinacionLL + y;
+    double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
+    double distanciaKP=-0.02;
+    double DistanciaError=80-distanciaFender;
+    double ajustedistancia=distanciaKP*DistanciaError;
 
 
-if(distanciaFender<100){
+  chasis.arcadeDrive(ajusteGiro, ajustedistancia);
 
-  chasis.arcadeDrive(ajusteGiro, -0.5);
+
+    /*
+if(distanciaFender<67){
+
+  chasis.arcadeDrive(ajusteGiro, -0.45);
 
 }
-if(distanciaFender>105){
+if(distanciaFender>70){
 
-  chasis.arcadeDrive(ajusteGiro, 0.5);
+  chasis.arcadeDrive(ajusteGiro, 0.45);
 }
 
-if(distanciaFender>100&&distanciaFender<104){
+if(distanciaFender>67&&distanciaFender<70){
 chasis.arcadeDrive(ajusteGiro, 0);
 
-}
+}*/
   }
 
   public void chasis_shoot_Adjust() { 
@@ -580,9 +588,9 @@ chasis.arcadeDrive(ajusteGiro, 0);
 
     // Probar
     double y = ty.getDouble(0.0);
-    double angleToGoalDegrees = anguloInclinacionLL + y;
+    double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (alturaUpperPulgadas - alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
 
 
 if(distanciaFender<67){
@@ -590,12 +598,12 @@ if(distanciaFender<67){
   chasis.arcadeDrive(ajusteGiro, -0.45);
 
 }
-if(distanciaFender>70){
+if(distanciaFender>63){
 
   chasis.arcadeDrive(ajusteGiro, 0.45);
 }
 
-if(distanciaFender>67&&distanciaFender<70){
+if(distanciaFender>63&&distanciaFender<67){
 chasis.arcadeDrive(ajusteGiro, 0);
 
 }

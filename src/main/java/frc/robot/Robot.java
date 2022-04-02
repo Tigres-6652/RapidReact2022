@@ -1,6 +1,6 @@
 
 package frc.robot;
-
+//*********Librerias *************** */
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
@@ -9,8 +9,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
-
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -99,10 +97,8 @@ public class Robot extends TimedRobot {
   NetworkTableEntry ta = table.getEntry("ta");
 
   double ajustdist;
+  double ajutGi;
 
-
-
- 
 
   // Navx /////
   AHRS navx = new AHRS(SPI.Port.kMXP);
@@ -115,7 +111,6 @@ public class Robot extends TimedRobot {
 
 
 //autonomo
-
 double KPgiro=0.0055;
 double headin;
 
@@ -136,8 +131,7 @@ double headin;
   public void robotPeriodic() {
 
     resetLimitSwitch();
-
-    // Calculos
+    // Cálculos
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
@@ -150,7 +144,6 @@ double headin;
 
     
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
-
     SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", !statusrobot.compresorState);
     SmartDashboard.putNumber("RPM shooter", MOTORSHOOTERRIGHT.getSelectedSensorVelocity()*-1*10*60/2048);
@@ -182,10 +175,6 @@ double headin;
   public void autonomousPeriodic() { // Autonomo
     ajusteDeTiroautonomo();
 
-/*double error=120-navx.getAngle();
-
-chasis.arcadeDrive(-KPgiro*error,0);
-*/
 
     if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
       ShooterPID(-4800);
@@ -206,8 +195,6 @@ chasis.arcadeDrive(-KPgiro*error,0);
       AutonomoTaxi();
     } 
     }
-
-  
 
   @Override
   public void teleopInit() {
@@ -252,6 +239,7 @@ chasis.arcadeDrive(-KPgiro*error,0);
 
   @Override
   public void disabledPeriodic() {
+
     desactivartodo();
 
     if (limitcapucha.get() == true) {
@@ -264,16 +252,13 @@ chasis.arcadeDrive(-KPgiro*error,0);
   @Override
   public void testInit() {
 
-   // falconpidConfig();
-
-  }
+ }
 
   @Override
   public void testPeriodic() {
 
 
   
-    //ShooterPID(-5000);
   }
 
   /*
@@ -302,21 +287,6 @@ chasis.arcadeDrive(-KPgiro*error,0);
 
   public void Intake() {
 
-    /*
-     * if (JoystickDriver1.getRawButtonPressed(Kxbox.BOTONES.A)) {
-     * if (statusrobot.IntakeState) {
-     * PISTINTAKE.set(true);
-     * statusrobot.IntakeState = false;
-     * 
-     * }
-     * } else {
-     * PISTINTAKE.set(false);
-     * //MOTORINTAKE.set(-0);
-     * 
-     * statusrobot.IntakeState = true;
-     * 
-     * {
-     */
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.LB)) {
 
@@ -327,13 +297,13 @@ chasis.arcadeDrive(-KPgiro*error,0);
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.RB)) {
       PISTINTAKE.set(Value.kForward);
-      MOTORINTAKE.set(0.45);
+      MOTORINTAKE.set(0.5);
 
     }
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.X) == true) {
 
-      MOTORINTAKE.set(-0.45);
+      MOTORINTAKE.set(-0.35);
 
     }
 
@@ -381,17 +351,6 @@ chasis.arcadeDrive(-KPgiro*error,0);
 
   }
 
-  /*
-   * public void cambiosShifter() {
-   * 
-   * if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter1) {
-   * PISTCHASIS.set(Value.kForward);
-   * }
-   * if (JoystickDriver1.getPOV() == ControlarMecanismos.shifter2) {
-   * PISTCHASIS.set(Value.kReverse);
-   * }
-   * }
-   */
   public void AutonomoTaxi() { // Se mueve :) Pa delante
 
     double encoIzq = MOTORI4ENC.getSelectedSensorPosition();
@@ -401,7 +360,6 @@ chasis.arcadeDrive(-KPgiro*error,0);
     SmartDashboard.putNumber("Econder derecho", testencodermenos);
 
     // encoizq
-
     double vuelta = encoIzq / 4096 / 4.17;
     double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
     double distmeters = Units.inchesToMeters(distanciainches);
@@ -475,7 +433,6 @@ chasis.arcadeDrive(-KPgiro*error,0);
     MOTORSHOOTERLEFT.configOpenloopRamp(1.5);
 
     // https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
-
     /* Factory Default all hardware to prevent unexpected behaviour */
     MOTORSHOOTERRIGHT.configFactoryDefault();
 
@@ -550,34 +507,44 @@ chasis.arcadeDrive(-KPgiro*error,0);
     double DistanciaError=60-distanciaFender;
     double ajustedistancia=distanciaKP*DistanciaError;
 
-    if(ajustedistancia>0.5){
+    if(ajustedistancia>0.6){
 
-      ajustdist=0.5;
+      ajustdist=0.6;
 
-    }else if(ajustedistancia<0.5){
+    }else if(ajustedistancia<0.6){
 
       ajustdist=ajustedistancia;
 
     }
 
-  chasis.arcadeDrive(ajusteGiro, ajustdist);
+    if(ajusteGiro<0.5){
+
+ajutGi=ajusteGiro;
+
+    }else if(ajusteGiro>0.5){
+
+ajutGi=0.5;
+
+    }
+
+  chasis.arcadeDrive(ajutGi, ajustdist);
 
 
-    /*
-if(distanciaFender<67){
+        /*
+    if(distanciaFender<67){
 
-  chasis.arcadeDrive(ajusteGiro, -0.45);
+      chasis.arcadeDrive(ajusteGiro, -0.45);
 
-}
-if(distanciaFender>70){
+    }
+    if(distanciaFender>70){
 
-  chasis.arcadeDrive(ajusteGiro, 0.45);
-}
+      chasis.arcadeDrive(ajusteGiro, 0.45);
+    }
 
-if(distanciaFender>67&&distanciaFender<70){
-chasis.arcadeDrive(ajusteGiro, 0);
+    if(distanciaFender>67&&distanciaFender<70){
+    chasis.arcadeDrive(ajusteGiro, 0);
 
-}*/
+    }*/
   }
 
   public void chasis_shoot_Adjust() { 

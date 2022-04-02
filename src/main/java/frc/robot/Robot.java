@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -97,7 +98,8 @@ public class Robot extends TimedRobot {
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
 
-  
+  double ajustdist;
+
 
 
  
@@ -178,15 +180,15 @@ double headin;
 
   @Override
   public void autonomousPeriodic() { // Autonomo
-    //ajusteDeTiroautonomo();
+    ajusteDeTiroautonomo();
 
-double error=120-navx.getAngle();
+/*double error=120-navx.getAngle();
 
 chasis.arcadeDrive(-KPgiro*error,0);
+*/
 
-
-    /*if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
-      ShooterPID(-5000);
+    if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
+      ShooterPID(-4800);
       AnguloCapuchaConfig = 6.8;
 
     } else {
@@ -201,8 +203,8 @@ chasis.arcadeDrive(-KPgiro*error,0);
     }
 
     if (Timer.getMatchTime() <= 9 ) {
-     // AutonomoTaxi();
-    } */
+      AutonomoTaxi();
+    } 
     }
 
   
@@ -224,7 +226,7 @@ chasis.arcadeDrive(-KPgiro*error,0);
   public void teleopPeriodic() { // Teleoperado
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
-      chasis_shoot_Adjust();
+      ajustedegiro();
     } else {
       // Mover Chassis
       double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
@@ -544,12 +546,21 @@ chasis.arcadeDrive(-KPgiro*error,0);
     double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
     double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
-    double distanciaKP=-0.02;
-    double DistanciaError=80-distanciaFender;
+    double distanciaKP=-0.07;
+    double DistanciaError=60-distanciaFender;
     double ajustedistancia=distanciaKP*DistanciaError;
 
+    if(ajustedistancia>0.5){
 
-  chasis.arcadeDrive(ajusteGiro, ajustedistancia);
+      ajustdist=0.5;
+
+    }else if(ajustedistancia<0.5){
+
+      ajustdist=ajustedistancia;
+
+    }
+
+  chasis.arcadeDrive(ajusteGiro, ajustdist);
 
 
     /*
@@ -593,17 +604,17 @@ chasis.arcadeDrive(ajusteGiro, 0);
     double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
 
 
-if(distanciaFender<67){
+if(distanciaFender<74){
 
   chasis.arcadeDrive(ajusteGiro, -0.45);
 
 }
-if(distanciaFender>63){
+if(distanciaFender>70){
 
   chasis.arcadeDrive(ajusteGiro, 0.45);
 }
 
-if(distanciaFender>63&&distanciaFender<67){
+if(distanciaFender>70&&distanciaFender<74){
 chasis.arcadeDrive(ajusteGiro, 0);
 
 }

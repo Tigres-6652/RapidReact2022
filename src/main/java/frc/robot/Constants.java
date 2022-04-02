@@ -84,7 +84,7 @@ public class Constants {
 
     public static final class LimeLight {
 
-        public static double kp = -0.030;
+        public static double kp = -0.05;
 
   // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
   // perfectamente vertical?
@@ -104,10 +104,11 @@ public class Constants {
 
     }
 
-    public static final class Kxbox { /*
-                                       * CONSTANTES PARA PROGRAMAR MAS RAPIDO EL CONTROL (FUNCIONA PARA SABER EL
-                                       * NUMERO DE ENTRADA DE CADA BOTON)
-                                       */
+    public static final class Kxbox { 
+        /*
+        * CONSTANTES PARA PROGRAMAR MAS RAPIDO EL CONTROL (FUNCIONA PARA SABER EL
+        * NUMERO DE ENTRADA DE CADA BOTON)
+        */
         public static final class BOTONES {
             // JoystickDriver1.getRawButton();
             public static int A = 1;
@@ -190,9 +191,9 @@ public class Constants {
     public static final class velocidadesShooter {
 
         public static final double fender = -2000;
-
         public static final double tarmac = -5150;
         public static final double launchpad = -6050;
+
         public static double velocidad;
     }
 

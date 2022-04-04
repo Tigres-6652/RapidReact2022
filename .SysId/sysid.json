@@ -1,5 +1,11 @@
 {
   "SysId": {
-    "Analysis Type": "General Mechanism"
+    "Analysis Type": "Drivetrain",
+    "AnalyzerJSONLocation": "D:\\jucav\\Descargas\\sysid_data20220403-142943.json",
+    "NetworkTables Settings": {
+      "serverTeam": "10.66.52.2"
+    },
+    "mode": "Client",
+    "serverTeam": "10.66.52.2"
   }
 }

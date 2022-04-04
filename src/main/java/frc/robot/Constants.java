@@ -84,7 +84,7 @@ public class Constants {
 
     public static final class LimeLight {
 
-        public static double kp = -0.05;
+        public static double kp = -0.04;
 
   // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
   // perfectamente vertical?

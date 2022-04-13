@@ -260,7 +260,6 @@ public class Robot extends TimedRobot {
     }
     compresor();
     Intake();
-    returnHome();
     climbler();
     anguloyvelocidad();
     if (JoystickDriver1.getPOV() == Kxbox.POV.izquierda) {
@@ -303,11 +302,6 @@ public class Robot extends TimedRobot {
 
     desactivartodo();
 
-    if (limitcapucha.get() == true) {
-      MOTORCAPUCHA.set(-0.4);
-    } else {
-      MOTORCAPUCHA.set(0);
-    }
   }
 
   @Override
@@ -696,8 +690,13 @@ public class Robot extends TimedRobot {
   public void returnHome() {
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
-      AnguloCapuchaConfig = 0;
+      if (limitcapucha.get() == true) {
+        MOTORCAPUCHA.set(-0.4);
+      } else {
+        MOTORCAPUCHA.set(0);
+      }
     }
+
   }
 
   public void resetLimitSwitch() {
@@ -773,16 +772,6 @@ public class Robot extends TimedRobot {
       MOTORINDEXER.set(0);
     }
 
-    // Capucha
-    SmartDashboard.putNumber("ANGULO", anguloFinal);
-    if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
-      MOTORCAPUCHA.set(0.5);
-    } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
-      MOTORCAPUCHA.set(0);
-    } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
-      MOTORCAPUCHA.set(-0.5);
-    }
-
     // Tiro Fender
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.B)) {
       velocidadesShooter.velocidad = velocidadesShooter.fender; // 4650
@@ -796,7 +785,21 @@ public class Robot extends TimedRobot {
     }
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
-      AnguloCapuchaConfig = 0;
+      if (limitcapucha.get() == true) {
+        MOTORCAPUCHA.set(-0.4);
+      } else {
+        MOTORCAPUCHA.set(0);
+      }
+    } else {
+      SmartDashboard.putNumber("ANGULO", anguloFinal);
+      if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
+        MOTORCAPUCHA.set(0.5);
+      } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
+        MOTORCAPUCHA.set(0);
+      } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
+        MOTORCAPUCHA.set(-0.5);
+      }
+
     }
 
   }
@@ -1016,6 +1019,7 @@ public class Robot extends TimedRobot {
       MOTORCAPUCHA.set(-0.5);
 
     }
+
   }
 
   public void ajustarvelocidad() {

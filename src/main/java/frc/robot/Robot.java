@@ -324,6 +324,16 @@ public class Robot extends TimedRobot {
     ajustarvelocidad();
     AjustarAngulo();
 
+    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
+      lanzamiento_de_distintos_lados();
+    } else {
+      // Mover Chassis
+      double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
+      chasis.arcadeDrive(
+          -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+          -VelocidadChasis.velocidadX * -velocidad);
+    }
+
   }
 
   /*
@@ -1028,4 +1038,5 @@ public class Robot extends TimedRobot {
     }
 
   }
+
 }

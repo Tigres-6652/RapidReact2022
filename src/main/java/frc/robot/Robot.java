@@ -1,7 +1,6 @@
 
 package frc.robot;
 
-
 //*********Librerias *************** */
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -41,7 +40,6 @@ import frc.robot.Constants.velocidadesShooter;
 import frc.robot.Constants.Motores.Climber;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 
 public class Robot extends TimedRobot {
 
@@ -123,7 +121,6 @@ public class Robot extends TimedRobot {
   double AutoInit;
   double time;
   double deltaMatchTime;
-
 
   // Autonomo time
   double valueAuto;
@@ -315,11 +312,17 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    falconpidConfig();
+    capuchaPIDinit();
+    reiniciarSensores();
+    desactivartodo();
 
   }
 
   @Override
   public void testPeriodic() {
+    ajustarvelocidad();
+    AjustarAngulo();
 
   }
 
@@ -805,7 +808,7 @@ public class Robot extends TimedRobot {
 
   public void PIDchasis() {
 
-    double rampchasis=0.3;
+    double rampchasis = 0.3;
 
     MOTORD1ENC.configFactoryDefault();
     MOTORD2.configFactoryDefault();
@@ -823,7 +826,6 @@ public class Robot extends TimedRobot {
     MOTORI4ENC.configOpenloopRamp(rampchasis);
     MOTORI5.configOpenloopRamp(rampchasis);
     MOTORI6.configOpenloopRamp(rampchasis);
-  
 
   }
 
@@ -994,4 +996,36 @@ public class Robot extends TimedRobot {
 
   }
 
+  public void AjustarAngulo() {
+    double anguloo = SmartDashboard.getNumber("ANGULO", 0);
+    if (anguloFinal >= (-anguloo + 1)) {
+      MOTORCAPUCHA.set(0.5);
+    } else if ((anguloFinal >= (-anguloo - 1)) && (anguloFinal <= (-anguloo + 1))) {
+      MOTORCAPUCHA.set(0);
+    } else if (anguloFinal <= (-anguloo - 1)) {
+      MOTORCAPUCHA.set(-0.5);
+
+    }
+  }
+
+  public void ajustarvelocidad() {
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) && limitindexer.get() == true) {
+      MOTORINDEXER.set(0.3);
+    } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.3) {
+      MOTORINDEXER.set(0.3);
+    } else {
+      MOTORINDEXER.set(0);
+    }
+
+    double velocidaad = SmartDashboard.getNumber("velocidad", 0);
+
+    // Apuntar
+    if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.3) {
+      ShooterPID(velocidaad);
+    } else {
+      MOTORSHOOTERLEFT.set(0);
+      MOTORSHOOTERRIGHT.set(-0);
+    }
+
+  }
 }

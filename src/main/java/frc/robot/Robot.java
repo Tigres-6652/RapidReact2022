@@ -1,17 +1,20 @@
 
 package frc.robot;
+
 import java.sql.Time;
 import java.util.concurrent.Delayed;
 
 //*********Librerias *************** */
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.util.Units;
@@ -25,6 +28,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -38,13 +42,11 @@ import frc.robot.Constants.LimeLight;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
-import frc.robot.Constants.anguloCapucha;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
 import frc.robot.Constants.Motores.Climber;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 
 
 public class Robot extends TimedRobot {
@@ -59,8 +61,7 @@ public class Robot extends TimedRobot {
   MotorControllerGroup MOTSI = new MotorControllerGroup(MOTORD1ENC, MOTORD2, MOTORD3);
   MotorControllerGroup MOTSD = new MotorControllerGroup(MOTORI4ENC, MOTORI5, MOTORI6);
   DifferentialDrive chasis = new DifferentialDrive(MOTSI, MOTSD);
-  DoubleSolenoid PISTCHASIS = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS1,
-      Neumatica.KPISTCHASIS2);
+  Solenoid PISTCHASIS = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTCHASIS1);
 
   // Neumática // (los pistones estan en su respectivo mecanismo)
   Compressor COMPRESOR = new Compressor(0, PneumaticsModuleType.CTREPCM);
@@ -70,8 +71,7 @@ public class Robot extends TimedRobot {
   Joystick JoystickDriver2 = new Joystick(Controles.KJoystickDriver2);
 
   // INTAKE //
-  DoubleSolenoid PISTINTAKE = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE1,
-      Neumatica.KPISTINTAKE2);
+  Solenoid PISTINTAKE = new Solenoid(PneumaticsModuleType.CTREPCM, Neumatica.KPISTINTAKE1);
   WPI_VictorSPX MOTORINTAKE = new WPI_VictorSPX(Motores.Intake.KMOTORINTAKE);
   boolean motints = false;
 
@@ -94,11 +94,10 @@ public class Robot extends TimedRobot {
 
   double AnguloCapuchaConfig;
 
-  
   // CLIMBER //
   CANSparkMax MOTORCLIMBER = new CANSparkMax(Climber.KMOTORCLIMBER, MotorType.kBrushless);
-  
-  //PDP
+
+  // PDP
   PowerDistribution pdp = new PowerDistribution();
 
   // LIMELIGHT //////
@@ -110,7 +109,6 @@ public class Robot extends TimedRobot {
   double ajustdist;
   double ajutGi;
 
-
   // Navx /////
   AHRS navx = new AHRS(SPI.Port.kMXP);
 
@@ -120,19 +118,17 @@ public class Robot extends TimedRobot {
   double capucha_angulo;
   double anguloFinal;
 
+  // autonomo
+  double KPgiro = 0.0055;
+  double headin;
+  double distmeters;
+  double angulo;
+  int estadoAuto = 0;
+  double timeAuto = 0;
 
-//autonomo
-double KPgiro=0.0055;
-double headin;
-double distmeters;
-double angulo;
-int estadoAuto = 0;
-double timeAuto = 0;
-
-double AutoInit;
+  double AutoInit;
   double time;
   double deltaMatchTime;
-
 
   // PATHVIEWER
 
@@ -153,8 +149,9 @@ double AutoInit;
   public static final double kRamseteB = 2;
   public static final double kRamseteZeta = 0.7;
 
-  //Autonomo time
-  
+  // Autonomo time
+  double valueAuto;
+  double lecturaAuto;
 
   /*
    *
@@ -165,18 +162,16 @@ double AutoInit;
   @Override
   public void robotInit() {
     reiniciarSensores();
-    //CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
 
   }
 
   @Override
   public void robotPeriodic() {
 
-
-
     resetLimitSwitch();
-    time=Timer.getFPGATimestamp();
-     //Cálculos
+    time = Timer.getFPGATimestamp();
+    // Cálculos
     double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
     double area = ta.getDouble(0.0);
@@ -184,47 +179,56 @@ double AutoInit;
     anguloFinal = -1 * capuchavalor / ktick2Degree;
     double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)
+        / Math.tan(angleToGoalRadians);
 
-    angulo=navx.getAngle();
-    
+    angulo = navx.getAngle();
+
     // IMPRIME LOS VALORES EN EL SMARTDASHBOARD
-    /*SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
+
+    // SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", !statusrobot.compresorState);
-    SmartDashboard.putNumber("RPM shooter", MOTORSHOOTERRIGHT.getSelectedSensorVelocity()*-1*10*60/2048);
-    SmartDashboard.putNumber("Current Shooter", (pdp.getCurrent(12)+pdp.getCurrent(3))/2);
-    SmartDashboard.putBoolean("Reset Capucha", limitcapucha.get());
-    SmartDashboard.putNumber("Valor Capucha", MOTORCAPUCHA.getSelectedSensorPosition());
-    SmartDashboard.putNumber("Corriente Capucha", MOTORCAPUCHA.getSupplyCurrent());
+    // SmartDashboard.putNumber("RPM shooter",
+    // MOTORSHOOTERRIGHT.getSelectedSensorVelocity() * -1 * 10 * 60 / 2048);
+    // SmartDashboard.putNumber("Current Shooter",
+    // (pdp.getCurrent(12) + pdp.getCurrent(3)) / 2);
+    // SmartDashboard.putBoolean("Reset Capucha", limitcapucha.get());
+    SmartDashboard.putNumber("Valor Capucha",
+        MOTORCAPUCHA.getSelectedSensorPosition());
+    SmartDashboard.putNumber("Corriente Capucha",
+        MOTORCAPUCHA.getSupplyCurrent());
     SmartDashboard.putNumber("Angulo Capucha", anguloFinal);
     SmartDashboard.putNumber("LL X Value", x);
     SmartDashboard.putNumber("LL Y Value", y);
     SmartDashboard.putNumber("LL X Area", area);
-    SmartDashboard.putNumber("Distancia Fender", distanciaFender);*/
-    SmartDashboard.putNumber("distanciaaaaa", distmeters);
-    SmartDashboard.putNumber("ajuste GI", ajutGi);
+    SmartDashboard.putNumber("Distancia Fender", distanciaFender);
+    lecturaAuto = SmartDashboard.getNumber("autoValue", 0);
 
-    SmartDashboard.putBoolean("LIMIT", limitcapucha.get());
+    ///// /*NO BORRAR, SON LECTURAS EN CASO DE ALGUN ERROR DETECTARLO MAS RAPIDO*/
 
-  SmartDashboard.putNumber("angulochasis", navx.getAngle());
-SmartDashboard.putNumber("CAPU", MOTORCAPUCHA.getSelectedSensorPosition());
+    // SmartDashboard.putNumber("distanciaaaaa", distmeters);
+    // SmartDashboard.putNumber("ajuste GI", ajutGi);
 
-SmartDashboard.putNumber("estado auto", estadoAuto);
-SmartDashboard.putNumber("tiempo delta", deltaMatchTime);
+    // SmartDashboard.putBoolean("LIMIT", limitcapucha.get());
 
-  //DISTANCIAS??
-  double encoIzq = MOTORI4ENC.getSelectedSensorPosition();
-  SmartDashboard.putNumber("Econder izquierdo", encoIzq);
-  double encoDer = MOTORD1ENC.getSelectedSensorPosition();
-  double testencodermenos = -1 * encoDer;
-  SmartDashboard.putNumber("Econder derecho", testencodermenos);
-double distancia=(encoIzq+testencodermenos)/2;
-  // encoizq
-  double vuelta = distancia / 4096 / 4.17;
-  double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
-   distmeters = Units.inchesToMeters(distanciainches);
+    // SmartDashboard.putNumber("angulochasis", navx.getAngle());
+    // SmartDashboard.putNumber("CAPU", MOTORCAPUCHA.getSelectedSensorPosition());
 
-    
+    // SmartDashboard.putNumber("estado auto", estadoAuto);
+    // SmartDashboard.putNumber("tiempo delta", deltaMatchTime);
+
+    // DISTANCIAS??
+    double encoIzq = MOTORI4ENC.getSelectedSensorPosition();
+    SmartDashboard.putNumber("Econder izquierdo", encoIzq);
+    double encoDer = MOTORD1ENC.getSelectedSensorPosition();
+    double testencodermenos = -1 * encoDer;
+    SmartDashboard.putNumber("Econder derecho", testencodermenos);
+    double distancia = (encoIzq + testencodermenos) / 2;
+    // encoizq
+    double vuelta = distancia / 4096 / 4.17;
+    double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
+    distmeters = Units.inchesToMeters(distanciainches);
+
   }
 
   @Override
@@ -234,121 +238,30 @@ double distancia=(encoIzq+testencodermenos)/2;
     falconpidConfig();
     capuchaPIDinit();
     estadoAuto = 0;
-    //AutoInit = Timer.getFPGATimestamp();
+    // AutoInit = Timer.getFPGATimestamp();
 
   }
 
   @Override
-  public void autonomousPeriodic() { // 
-    
+  public void autonomousPeriodic() { //
 
-    AnguloCapuchaConfig=19;
-    ajusteDeTiroautonomo();
-    velocidadesShooter.velocidad = velocidadesShooter.tarmac;
-    
-    
-    switch(estadoAuto){
+    if (lecturaAuto == 0) {
+      autonomo_1_taxi_pegado_fender();
 
-    case 0:
-    PISTINTAKE.set(Value.kForward);
-    MOTORINTAKE.set(0.55);
+    } else if (lecturaAuto == 1) {
 
-    estadoAuto = 1;
-    break;
+      autonomo_2_cargos_linea_fender();
 
-    case 1:
-      if(Math.abs(distmeters) <= 1.35){
-        chasis.arcadeDrive(0, 0.5);
-      } else {
-        chasis.arcadeDrive(0, 0);
+    } else if (lecturaAuto == 2) {
 
-        estadoAuto = 2;
-      }
-    break;
-    
-    case 2:
-      PISTINTAKE.set(Value.kReverse);
-      MOTORINTAKE.set(0);
-      estadoAuto = 3;
-    break;
-
-    case 3:
-    if(Math.abs(navx.getAngle()) <= 150){
-      chasis.arcadeDrive(-0.5, 0);
-    } else {
-      chasis.arcadeDrive(0, 0);
-      MOTORD1ENC.setSelectedSensorPosition(0);
-      MOTORI4ENC.setSelectedSensorPosition(0);
-      estadoAuto = 4;
-    }
-    break;
-
-    
-
-    case 4:
-    if(Math.abs(distmeters) <= 0.4){
-      chasis.arcadeDrive(0, 0.4);
-    } else {
-      chasis.arcadeDrive(0, 0);
-      estadoAuto = 5;
-    }
-    break;
-
-    case 5:
-    AutoInit = Timer.getFPGATimestamp();
-    estadoAuto =6;
-    break;
-
-    case 6:
-    deltaMatchTime = time - AutoInit;
-    ShooterPID(velocidadesShooter.tarmac);
-    if(deltaMatchTime <= 5.5){
-      ajustedegiroautonomo();
-    }else if(deltaMatchTime > 5.5 && deltaMatchTime <= 8.5){
-      MOTORINDEXER.set(0.23);
-    }else if(deltaMatchTime > 8.5){
-      estadoAuto = 7;
-    }
-    break;
-
-    case 7:
-    MOTORD1ENC.setSelectedSensorPosition(0);
-    MOTORI4ENC.setSelectedSensorPosition(0);
-    estadoAuto = 8;
-    break;
-
-    case 8:
-    AutonomoTaxi();
-    break;
-  
-
+      autonomo_taxi_a_finales();
     }
 
-
-/*
-    if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
-      ShooterPID(-4800);
-      AnguloCapuchaConfig = 6.8;
-
-    } else {
-      MOTORSHOOTERLEFT.set(0);
-      MOTORSHOOTERRIGHT.set(-0);
-    }
-
-    if (Timer.getMatchTime() <= 12 && Timer.getMatchTime() >= 9.8) {
-      MOTORINDEXER.set(0.4);
-    } else {
-      MOTORINDEXER.set(0);
-    }
-
-    if (Timer.getMatchTime() <= 9 ) {
-      AutonomoTaxi();
-    }
-    */ 
-    }
+  }
 
   @Override
   public void teleopInit() {
+    SmartDashboard.putNumber("autoValue", valueAuto);
 
     falconpidConfig();
     reiniciarSensores();
@@ -357,14 +270,14 @@ double distancia=(encoIzq+testencodermenos)/2;
     capuchaPIDinit();
 
     AnguloCapuchaConfig = 0;
-  
+
   }
 
   @Override
   public void teleopPeriodic() { // Teleoperado
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
-      ajustedegiro();
+      lanzamiento_de_distintos_lados();
     } else {
       // Mover Chassis
       double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
@@ -377,6 +290,31 @@ double distancia=(encoIzq+testencodermenos)/2;
     returnHome();
     climbler();
     anguloyvelocidad();
+    if (JoystickDriver1.getPOV() == Kxbox.POV.izquierda) {
+      PISTCHASIS.set(true);
+
+    } else if (JoystickDriver1.getPOV() == Kxbox.POV.derecha) {
+      PISTCHASIS.set(false);
+    }
+
+    if (JoystickDriver1.getPOV() == Kxbox.POV.abajo) {
+      MOTORD1ENC.setNeutralMode(NeutralMode.Brake);
+      MOTORD2.setNeutralMode(NeutralMode.Brake);
+      MOTORD3.setNeutralMode(NeutralMode.Brake);
+      MOTORI4ENC.setNeutralMode(NeutralMode.Brake);
+      MOTORI5.setNeutralMode(NeutralMode.Brake);
+      MOTORI6.setNeutralMode(NeutralMode.Brake);
+
+    } else {
+      MOTORD1ENC.setNeutralMode(NeutralMode.Coast);
+      MOTORD2.setNeutralMode(NeutralMode.Coast);
+      MOTORD3.setNeutralMode(NeutralMode.Coast);
+      MOTORI4ENC.setNeutralMode(NeutralMode.Coast);
+      MOTORI5.setNeutralMode(NeutralMode.Coast);
+      MOTORI6.setNeutralMode(NeutralMode.Coast);
+
+    }
+
   }
 
   @Override
@@ -402,13 +340,11 @@ double distancia=(encoIzq+testencodermenos)/2;
   @Override
   public void testInit() {
 
- }
+  }
 
   @Override
   public void testPeriodic() {
 
-
-  
   }
 
   /*
@@ -437,16 +373,15 @@ double distancia=(encoIzq+testencodermenos)/2;
 
   public void Intake() {
 
-
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.LB)) {
 
-      PISTINTAKE.set(Value.kReverse);
+      PISTINTAKE.set(false);
       MOTORINTAKE.set(0);
 
     }
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.RB)) {
-      PISTINTAKE.set(Value.kForward);
+      PISTINTAKE.set(true);
       MOTORINTAKE.set(0.5);
 
     }
@@ -475,16 +410,15 @@ double distancia=(encoIzq+testencodermenos)/2;
 
     // Desactiva totalmente todo, incluso si ya estaba desactivado antes
     chasis.arcadeDrive(0, 0);
-    PISTCHASIS.set(Value.kOff);
-    PISTINTAKE.set(Value.kReverse);
+    PISTCHASIS.set(false);
+    PISTINTAKE.set(false);
     MOTORINTAKE.set(0);
     MOTORINDEXER.set(0);
     MOTORSHOOTERLEFT.set(0);
     MOTORSHOOTERRIGHT.set(0);
     MOTORCAPUCHA.set(0);
-    //MOTORCLIMBER.set(0);
+    // MOTORCLIMBER.set(0);
     MOTORCLIMBER.restoreFactoryDefaults();
-
 
   }
 
@@ -501,9 +435,43 @@ double distancia=(encoIzq+testencodermenos)/2;
     MOTORCLIMBER.restoreFactoryDefaults();
     navx.reset();
 
-
     MOTORCAPUCHA.set(0);
 
+  }
+
+  public void AutonomoTaxiPegadoFender() { // Se mueve :) Pa delante
+
+    double encoIzq = MOTORI4ENC.getSelectedSensorPosition();
+    SmartDashboard.putNumber("Econder izquierdo", encoIzq);
+    double encoDer = MOTORD1ENC.getSelectedSensorPosition();
+    double testencodermenos = -1 * encoDer;
+    SmartDashboard.putNumber("Econder derecho", testencodermenos);
+    double distancia = (encoIzq + testencodermenos) / 2;
+    // encoizq
+    double vuelta = distancia / 4096 / 4.17;
+    double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
+    double distmeters = Units.inchesToMeters(distanciainches);
+
+    // SmartDashboard.putNumber("distancia", distmeters);
+
+    if (distmeters <= 2.5) {
+      chasis.arcadeDrive(0, -0.7);
+    }
+
+    if (distmeters >= 2.51 && distmeters <= 2.6) {
+      chasis.arcadeDrive(0, 0);
+      MOTORD1ENC.setNeutralMode(NeutralMode.Brake);
+      MOTORD2.setNeutralMode(NeutralMode.Brake);
+      MOTORD3.setNeutralMode(NeutralMode.Brake);
+      MOTORI4ENC.setNeutralMode(NeutralMode.Brake);
+      MOTORI5.setNeutralMode(NeutralMode.Brake);
+      MOTORI6.setNeutralMode(NeutralMode.Brake);
+
+    }
+
+    if (distmeters >= 2.61) {
+      chasis.arcadeDrive(0, 0.4);
+    }
   }
 
   public void AutonomoTaxi() { // Se mueve :) Pa delante
@@ -513,45 +481,32 @@ double distancia=(encoIzq+testencodermenos)/2;
     double encoDer = MOTORD1ENC.getSelectedSensorPosition();
     double testencodermenos = -1 * encoDer;
     SmartDashboard.putNumber("Econder derecho", testencodermenos);
-double distancia=(encoIzq+testencodermenos)/2;
+    double distancia = (encoIzq + testencodermenos) / 2;
     // encoizq
     double vuelta = distancia / 4096 / 4.17;
     double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
     double distmeters = Units.inchesToMeters(distanciainches);
 
-    SmartDashboard.putNumber("distancia?", distmeters);
+    // SmartDashboard.putNumber("distancia?", distmeters);
 
     if (distmeters <= 1) {
-      chasis.arcadeDrive(0, -0.65);
+      chasis.arcadeDrive(0, -0.7);
     }
 
     if (distmeters >= 1.1 && distmeters <= 1.2) {
       chasis.arcadeDrive(0, 0);
+      MOTORD1ENC.setNeutralMode(NeutralMode.Brake);
+      MOTORD2.setNeutralMode(NeutralMode.Brake);
+      MOTORD3.setNeutralMode(NeutralMode.Brake);
+      MOTORI4ENC.setNeutralMode(NeutralMode.Brake);
+      MOTORI5.setNeutralMode(NeutralMode.Brake);
+      MOTORI6.setNeutralMode(NeutralMode.Brake);
+
     }
 
     if (distmeters >= 1.21) {
       chasis.arcadeDrive(0, 0.4);
     }
-
-    /*double direccionx = navx.getDisplacementX();
-    double direcciony = navx.getDisplacementX();
-    double angulo = navx.getAngle();
-    SmartDashboard.putNumber("Coordenada x", direccionx);
-    SmartDashboard.putNumber("Coordenada y", direcciony);
-    SmartDashboard.putNumber("angulo", angulo);
-    
-      if (distmeters <= 3 && angulo <= 5) {
-      chasis.arcadeDrive(-0.5, 0.7);
-      }
-      if (distmeters <= 3 && angulo >= 5) {
-      chasis.arcadeDrive(0.4, 0.7);
-      }
-      
-      if (distmeters <= 3 && angulo <= 5 && angulo >= -5) {
-      chasis.arcadeDrive(-0, 0.7);
-     }*/
-     
-
   }
 
   public void falconpidConfig() { // no moverle a esto por favor👍
@@ -634,7 +589,7 @@ double distancia=(encoIzq+testencodermenos)/2;
     MOTORSHOOTERRIGHT.set(TalonFXControlMode.Velocity, -targetVelocity_UnitsPer100ms);
   }
 
-  public void ajustedegiro() { // Probar
+  public void ajustedelanzamiento(double distacia) {
 
     double x = tx.getDouble(0.0);
     double ajusteGiro = 0.0f;
@@ -650,49 +605,38 @@ double distancia=(encoIzq+testencodermenos)/2;
 
     }
 
-
     // distancia
     double y = ty.getDouble(0.0);
     double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
-    double distanciaKP=-0.07;
-    double DistanciaError=60-distanciaFender;
-    double ajustedistancia=distanciaKP*DistanciaError;
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)
+        / Math.tan(angleToGoalRadians);
+    double distanciaKP = -0.085;
+    double DistanciaError = distacia - distanciaFender;
+    double ajustedistancia = distanciaKP * DistanciaError;
 
-    if(ajustedistancia>0.45){
+    if (ajustedistancia > 0.45) {
 
-      ajustdist=0.45;
+      ajustdist = 0.45;
 
-    }else if(ajustedistancia<0.45){
+    } else if (ajustedistancia < 0.45) {
 
-      ajustdist=ajustedistancia;
-
-    }
-
-    if(ajusteGiro<0.4){
-
-ajutGi=ajusteGiro*1.5;
-
-    }else if(ajusteGiro>0.4){
-
-ajutGi=0.4;
+      ajustdist = ajustedistancia;
 
     }
 
-  chasis.arcadeDrive(ajutGi, ajustdist);
+    if (ajusteGiro > 0.4) {
 
+      ajutGi = 0.4;
 
-        /*
-    if(distanciaFender<67){
-      chasis.arcadeDrive(ajusteGiro, -0.45);
+    } else if (ajusteGiro < 0.4) {
+
+      ajutGi = ajusteGiro;
+
     }
-    if(distanciaFender>70){
-      chasis.arcadeDrive(ajusteGiro, 0.45);
-    }
-    if(distanciaFender>67&&distanciaFender<70){
-    chasis.arcadeDrive(ajusteGiro, 0);
-    }*/
+
+    chasis.arcadeDrive(ajutGi, ajustdist);
+
   }
 
   public void ajustedegiroautonomo() { // Probar
@@ -711,98 +655,45 @@ ajutGi=0.4;
 
     }
 
-
     // distancia
     double y = ty.getDouble(0.0);
     double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
     double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
-    double distanciaKP=-0.06;
-    double DistanciaError=60-distanciaFender;
-    double ajustedistancia=distanciaKP*DistanciaError;
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)
+        / Math.tan(angleToGoalRadians);
+    double distanciaKP = -0.065;
+    double DistanciaError = 65 - distanciaFender;
+    double ajustedistancia = distanciaKP * DistanciaError;
 
-    if(ajustedistancia>0.55){
+    if (ajustedistancia > 0.55) {
 
-      ajustdist=0.55;
+      ajustdist = 0.55;
 
-    }else if(ajustedistancia<0.55){
+    } else if (ajustedistancia < 0.55) {
 
-      ajustdist=ajustedistancia;
+      ajustdist = ajustedistancia;
 
     }
 
-if(ajusteGiro>0.45){
+    if (ajusteGiro > 0.45) {
 
-ajutGi=0.45;
+      ajutGi = 0.45;
 
-    }else if(ajusteGiro<0.45){
+    } else if (ajusteGiro < 0.45) {
 
-      ajutGi=ajusteGiro;
-      
-          }
+      ajutGi = ajusteGiro;
 
-  chasis.arcadeDrive(ajutGi, ajustdist);
-
-
-        /*
-    if(distanciaFender<67){
-      chasis.arcadeDrive(ajusteGiro, -0.45);
     }
-    if(distanciaFender>70){
-      chasis.arcadeDrive(ajusteGiro, 0.45);
-    }
-    if(distanciaFender>67&&distanciaFender<70){
-    chasis.arcadeDrive(ajusteGiro, 0);
-    }*/
+
+    chasis.arcadeDrive(ajutGi, ajustdist);
+
   }
 
-  public void chasis_shoot_Adjust() { 
-    
-    double x = tx.getDouble(0.0);
-    double ajusteGiro = 0.0f;
-    float min_command = 0.03f;
-
-    if (x > 0.2) {
-
-      ajusteGiro = Constants.LimeLight.kp * x - min_command;
-
-    } else if (x < 0.2) {
-
-      ajusteGiro = Constants.LimeLight.kp * x + min_command;
-
-    }
-
-
-    // Probar
-    double y = ty.getDouble(0.0);
-    double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
-    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)/Math.tan(angleToGoalRadians);
-
-
-if(distanciaFender<74){
-
-  chasis.arcadeDrive(ajusteGiro, -0.45);
-
-}
-if(distanciaFender>70){
-
-  chasis.arcadeDrive(ajusteGiro, 0.45);
-}
-
-if(distanciaFender>70&&distanciaFender<74){
-chasis.arcadeDrive(ajusteGiro, 0);
-
-}
-  }
-
-  
-
-  public void climbler() { // Probar
+  public void climbler() {
 
     if (JoystickDriver2.getPOV() == Kxbox.POV.arriba) {
 
-      MOTORCLIMBER.set(0.7);
+      MOTORCLIMBER.set(1);
     }
     if (JoystickDriver2.getPOV() == Kxbox.POV.abajo) {
 
@@ -812,7 +703,6 @@ chasis.arcadeDrive(ajusteGiro, 0);
     }
 
   }
-
 
   public void returnHome() {
 
@@ -857,6 +747,8 @@ chasis.arcadeDrive(ajusteGiro, 0);
     MOTORCAPUCHA.config_kD(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kD,
         Constants.KPIDCapucha.kTimeoutMs);
 
+    MOTORCAPUCHA.configOpenloopRamp(0.5);
+
   }
 
   public void capuchaPIDteleop(double rpmcapucha) {
@@ -876,7 +768,7 @@ chasis.arcadeDrive(ajusteGiro, 0);
   public void anguloyvelocidad() {
 
     // Apuntar
-    if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.5) {
+    if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.3) {
       ShooterPID(velocidadesShooter.velocidad);
     } else {
       MOTORSHOOTERLEFT.set(0);
@@ -886,21 +778,20 @@ chasis.arcadeDrive(ajusteGiro, 0);
     // Disparar
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.LB) && limitindexer.get() == true) {
       MOTORINDEXER.set(0.3);
-    } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.5) {
+    } else if (JoystickDriver2.getRawAxis(Kxbox.AXES.RT) >= 0.3) {
       MOTORINDEXER.set(0.3);
     } else {
       MOTORINDEXER.set(0);
     }
 
     // Capucha
-    SmartDashboard.putNumber("ANGULO", anguloFinal)
-    ;
+    SmartDashboard.putNumber("ANGULO", anguloFinal);
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
-      MOTORCAPUCHA.set(0.3);
+      MOTORCAPUCHA.set(0.5);
     } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
       MOTORCAPUCHA.set(0);
     } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
-      MOTORCAPUCHA.set(-0.3);
+      MOTORCAPUCHA.set(-0.5);
     }
 
     // Tiro Fender
@@ -911,18 +802,12 @@ chasis.arcadeDrive(ajusteGiro, 0);
 
     // Tarmac 1.84m
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.A)) {
-      AnguloCapuchaConfig =  Constants.anguloCapucha.tarmac;
+      AnguloCapuchaConfig = Constants.anguloCapucha.tarmac;
       velocidadesShooter.velocidad = velocidadesShooter.tarmac;
     }
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
       AnguloCapuchaConfig = 0;
-    }
-
-    // Launch Pad
-    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.X)) {
-      AnguloCapuchaConfig =  Constants.anguloCapucha.launchpad;
-      velocidadesShooter.velocidad = velocidadesShooter.launchpad;
     }
 
   }
@@ -952,13 +837,178 @@ chasis.arcadeDrive(ajusteGiro, 0);
     MOTORI5.configFactoryDefault();
     MOTORI6.configFactoryDefault();
 
-
-
     MOTORD1ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     MOTORI4ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
     MOTORD1ENC.configOpenloopRamp(0.0);
     MOTORI4ENC.configOpenloopRamp(0.0);
+  }
+
+  public void autonomo_2_cargos_linea_fender() {
+
+    AnguloCapuchaConfig = 18;
+    ajusteDeTiroautonomo();
+    velocidadesShooter.velocidad = 5150;
+
+    switch (estadoAuto) {
+
+      case 0:
+        PISTINTAKE.set(true);
+        MOTORINTAKE.set(0.6);
+
+        estadoAuto = 1;
+        break;
+
+      case 1:
+        if (Math.abs(distmeters) <= 1.35) {
+          chasis.arcadeDrive(0, 0.54);
+        } else {
+          chasis.arcadeDrive(0, 0);
+
+          estadoAuto = 2;
+        }
+        break;
+
+      case 2:
+        PISTINTAKE.set(false);
+        estadoAuto = 3;
+        break;
+
+      case 3:
+        if (Math.abs(navx.getAngle()) <= 150) {
+          chasis.arcadeDrive(-0.64, 0);
+        } else {
+          chasis.arcadeDrive(0, 0);
+          MOTORD1ENC.setSelectedSensorPosition(0);
+          MOTORI4ENC.setSelectedSensorPosition(0);
+          estadoAuto = 4;
+        }
+        break;
+
+      case 4:
+        if (Math.abs(distmeters) <= 0.33) {
+          chasis.arcadeDrive(0, 0.5);
+        } else {
+          chasis.arcadeDrive(0, 0);
+          estadoAuto = 5;
+        }
+        break;
+
+      case 5:
+        AutoInit = Timer.getFPGATimestamp();
+        estadoAuto = 6;
+        break;
+
+      case 6:
+        deltaMatchTime = time - AutoInit;
+        ShooterPID(velocidadesShooter.tarmac);
+        if (deltaMatchTime <= 4.75) {
+          ajustedegiroautonomo();
+        } else if (deltaMatchTime > 4.75 && deltaMatchTime <= 7.75) {
+          MOTORINDEXER.set(0.23);
+          MOTORINTAKE.set(0);
+        } else if (deltaMatchTime > 7.5) {
+          estadoAuto = 7;
+        }
+        break;
+
+      case 7:
+        MOTORD1ENC.setSelectedSensorPosition(0);
+        MOTORI4ENC.setSelectedSensorPosition(0);
+        estadoAuto = 8;
+        break;
+
+      case 8:
+        AutonomoTaxi();
+        break;
+
+    }
+  }
+
+  public void autonomo_1_taxi_pegado_fender() {
+    ajusteDeTiroautonomo();
+
+    if (Timer.getMatchTime() <= 15 && Timer.getMatchTime() >= 10) {
+      ShooterPID(-4800);
+      AnguloCapuchaConfig = 6.8;
+
+    } else {
+      MOTORSHOOTERLEFT.set(0);
+      MOTORSHOOTERRIGHT.set(-0);
+    }
+
+    if (Timer.getMatchTime() <= 12 && Timer.getMatchTime() >= 9.8) {
+      MOTORINDEXER.set(0.4);
+    } else {
+      MOTORINDEXER.set(0);
+      MOTORINTAKE.set(0);
+
+    }
+
+    if (Timer.getMatchTime() <= 9) {
+      AutonomoTaxiPegadoFender();
+    }
+
+  }
+
+  public void autonomo_taxi_a_inicios() {
+
+    if (Timer.getMatchTime() < 14 && Timer.getMatchTime() > 12) {
+      AutonomoTaxiPegadoFender();
+
+    } else {
+
+      chasis.arcadeDrive(0, 0);
+    }
+  }
+
+  public void autonomo_taxi_a_finales() {
+
+    if (Timer.getMatchTime() < 6 && Timer.getMatchTime() > 1) {
+      AutonomoTaxiPegadoFender();
+
+    } else {
+
+      chasis.arcadeDrive(0, 0);
+    }
+
+  }
+
+  public void lanzamiento_de_distintos_lados() {
+    // calculos
+    // distancia
+    double y = ty.getDouble(0.0);
+    double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    double distanciaFender = (LimeLight.alturaUpperPulgadas - LimeLight.alturaAlPisoPugadasLL)
+        / Math.tan(angleToGoalRadians);
+
+    if (distanciaFender > 0 && distanciaFender < 70) {
+
+      ajustedelanzamiento(60);
+      AnguloCapuchaConfig = 19;
+      velocidadesShooter.velocidad = -5150;
+    }
+    if (distanciaFender > 71 && distanciaFender < 110) {
+
+      ajustedelanzamiento(90);
+      AnguloCapuchaConfig = 19;
+      velocidadesShooter.velocidad = -5150;
+    }
+    if (distanciaFender > 111 && distanciaFender < 150) {
+
+      ajustedelanzamiento(130);
+      AnguloCapuchaConfig = 19;
+      velocidadesShooter.velocidad = -5150;
+    }
+
+    if (distanciaFender > 151 && distanciaFender < 190) {
+
+      ajustedelanzamiento(170);
+      AnguloCapuchaConfig = 19;
+      velocidadesShooter.velocidad = -5150;
+    }
+
   }
 
 }

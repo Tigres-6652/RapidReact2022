@@ -1,8 +1,6 @@
 
 package frc.robot;
 
-import java.sql.Time;
-import java.util.concurrent.Delayed;
 
 //*********Librerias *************** */
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -23,7 +21,6 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -31,7 +28,6 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -130,24 +126,6 @@ public class Robot extends TimedRobot {
   double time;
   double deltaMatchTime;
 
-  // PATHVIEWER
-
-  DifferentialDriveOdometry m_odometry;
-
-  public static final double ksVolts = 0.22;
-  public static final double kvVoltSecondsPerMeter = 1.98;
-  public static final double kaVoltSecondsSquaredPerMeter = 0.2;
-
-  public static final double kTrackwidthMeters = 0.69;
-  public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
-
-  public static final double kPDriveVel = 8.5;
-
-  public static final double kMaxSpeedMetersPerSecond = 3;
-  public static final double kMaxAccelerationMetersPerSecondSquared = 3;
-
-  public static final double kRamseteB = 2;
-  public static final double kRamseteZeta = 0.7;
 
   // Autonomo time
   double valueAuto;
@@ -266,7 +244,7 @@ public class Robot extends TimedRobot {
     falconpidConfig();
     reiniciarSensores();
     desactivartodo();
-    // PIDchasis();
+    PIDchasis();
     capuchaPIDinit();
 
     AnguloCapuchaConfig = 0;
@@ -382,7 +360,7 @@ public class Robot extends TimedRobot {
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.RB)) {
       PISTINTAKE.set(true);
-      MOTORINTAKE.set(0.5);
+      MOTORINTAKE.set(0.6);
 
     }
 
@@ -829,9 +807,10 @@ public class Robot extends TimedRobot {
 
   public void PIDchasis() {
 
+    double rampchasis=0.3;
+
     MOTORD1ENC.configFactoryDefault();
     MOTORD2.configFactoryDefault();
-
     MOTORD3.configFactoryDefault();
     MOTORI4ENC.configFactoryDefault();
     MOTORI5.configFactoryDefault();
@@ -840,8 +819,14 @@ public class Robot extends TimedRobot {
     MOTORD1ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     MOTORI4ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
-    MOTORD1ENC.configOpenloopRamp(0.0);
-    MOTORI4ENC.configOpenloopRamp(0.0);
+    MOTORD1ENC.configOpenloopRamp(rampchasis);
+    MOTORD2.configOpenloopRamp(rampchasis);
+    MOTORD3.configOpenloopRamp(rampchasis);
+    MOTORI4ENC.configOpenloopRamp(rampchasis);
+    MOTORI5.configOpenloopRamp(rampchasis);
+    MOTORI6.configOpenloopRamp(rampchasis);
+  
+
   }
 
   public void autonomo_2_cargos_linea_fender() {

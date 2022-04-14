@@ -11,6 +11,9 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX; //librerias
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
@@ -38,8 +41,7 @@ import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
 import frc.robot.Constants.Motores.Climber;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 
 public class Robot extends TimedRobot {
 
@@ -126,6 +128,9 @@ public class Robot extends TimedRobot {
   double valueAuto;
   double lecturaAuto;
 
+
+  double velocidaad;
+
   /*
    *
    * SEPARACION DE INSTANCIAS
@@ -177,6 +182,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Distancia Fender", distanciaFender);
     lecturaAuto = SmartDashboard.getNumber("autoValue", 0);
 
+    velocidaad = SmartDashboard.getNumber("ajuste velocidad", 0);
+
+
     ///// /*NO BORRAR, SON LECTURAS EN CASO DE ALGUN ERROR DETECTARLO MAS RAPIDO*/
 
     // SmartDashboard.putNumber("distanciaaaaa", distmeters);
@@ -201,6 +209,8 @@ public class Robot extends TimedRobot {
     double vuelta = distancia / 4096 / 4.17;
     double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
     distmeters = Units.inchesToMeters(distanciainches);
+
+
 
   }
 
@@ -249,7 +259,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
-    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
+    /*if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
       lanzamiento_de_distintos_lados();
     } else {
       // Mover Chassis
@@ -285,6 +295,19 @@ public class Robot extends TimedRobot {
       MOTORI5.setNeutralMode(NeutralMode.Coast);
       MOTORI6.setNeutralMode(NeutralMode.Coast);
 
+    }*/
+
+    ajustarvelocidad();
+    AjustarAngulo();
+
+    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
+      lanzamiento_de_distintos_lados();
+    } else {
+      // Mover Chassis
+      double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
+      chasis.arcadeDrive(
+          -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+          -VelocidadChasis.velocidadX * -velocidad);
     }
 
   }
@@ -1010,7 +1033,7 @@ public class Robot extends TimedRobot {
   }
 
   public void AjustarAngulo() {
-    double anguloo = SmartDashboard.getNumber("ANGULO", 0);
+    double anguloo = SmartDashboard.getNumber("ajuste ANGULO", 0);
     if (anguloFinal >= (-anguloo + 1)) {
       MOTORCAPUCHA.set(0.5);
     } else if ((anguloFinal >= (-anguloo - 1)) && (anguloFinal <= (-anguloo + 1))) {
@@ -1031,7 +1054,6 @@ public class Robot extends TimedRobot {
       MOTORINDEXER.set(0);
     }
 
-    double velocidaad = SmartDashboard.getNumber("velocidad", 0);
 
     // Apuntar
     if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.3) {

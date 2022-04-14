@@ -125,7 +125,8 @@ public class Robot extends TimedRobot {
   // Autonomo time
   double valueAuto;
   double lecturaAuto;
-
+  double velocidaad;
+  double anguloo;
   /*
    *
    * SEPARACION DE INSTANCIAS
@@ -176,6 +177,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("LL X Area", area);
     SmartDashboard.putNumber("Distancia Fender", distanciaFender);
     lecturaAuto = SmartDashboard.getNumber("autoValue", 0);
+    anguloo = SmartDashboard.getNumber("ANGULO", 0);
+    velocidaad = SmartDashboard.getNumber("velocidasd", 0);
+
+
 
     ///// /*NO BORRAR, SON LECTURAS EN CASO DE ALGUN ERROR DETECTARLO MAS RAPIDO*/
 
@@ -234,7 +239,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    SmartDashboard.putNumber("autoValue", valueAuto);
+    SmartDashboard.putNumber("anguloo", anguloo);
+    SmartDashboard.putNumber("velocidadd", velocidaad);
 
     falconpidConfig();
     reiniciarSensores();
@@ -249,7 +255,11 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { // Teleoperado
 
-    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
+    AjustarAngulo();
+    ajustarvelocidad();
+
+
+    /*if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
       lanzamiento_de_distintos_lados();
     } else {
       // Mover Chassis
@@ -286,7 +296,7 @@ public class Robot extends TimedRobot {
       MOTORI6.setNeutralMode(NeutralMode.Coast);
 
     }
-
+*/
   }
 
   @Override
@@ -735,7 +745,7 @@ public class Robot extends TimedRobot {
     MOTORCAPUCHA.config_kD(Constants.KPIDCapucha.kPIDLoopIdx, Constants.KPIDCapucha.kGains_Velocit.kD,
         Constants.KPIDCapucha.kTimeoutMs);
 
-    MOTORCAPUCHA.configOpenloopRamp(0.5);
+    MOTORCAPUCHA.configOpenloopRamp(0.3);
 
   }
 
@@ -1010,13 +1020,12 @@ public class Robot extends TimedRobot {
   }
 
   public void AjustarAngulo() {
-    double anguloo = SmartDashboard.getNumber("ANGULO", 0);
     if (anguloFinal >= (-anguloo + 1)) {
-      MOTORCAPUCHA.set(0.5);
+      MOTORCAPUCHA.set(0.3);
     } else if ((anguloFinal >= (-anguloo - 1)) && (anguloFinal <= (-anguloo + 1))) {
       MOTORCAPUCHA.set(0);
     } else if (anguloFinal <= (-anguloo - 1)) {
-      MOTORCAPUCHA.set(-0.5);
+      MOTORCAPUCHA.set(-0.3);
 
     }
 
@@ -1031,7 +1040,6 @@ public class Robot extends TimedRobot {
       MOTORINDEXER.set(0);
     }
 
-    double velocidaad = SmartDashboard.getNumber("velocidad", 0);
 
     // Apuntar
     if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.3) {

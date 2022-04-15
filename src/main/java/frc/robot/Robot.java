@@ -123,12 +123,13 @@ public class Robot extends TimedRobot {
   double time;
   double deltaMatchTime;
 
-  // Autonomo time
+  // Variables solas
   double valueAuto;
   double lecturaAuto;
 
-double anguloo;
+  double anguloo;
   double velocidaad;
+  double ajusteanguloamotor;
 
   /*
    *
@@ -812,15 +813,31 @@ double anguloo;
       AnguloCapuchaConfig = Constants.anguloCapucha.tarmac;
       velocidadesShooter.velocidad = velocidadesShooter.tarmac;
     }
+    if (JoystickDriver2.getRawButton(Kxbox.BOTONES.X)) {
+      AnguloCapuchaConfig = Constants.anguloCapucha.launchpad;
+      velocidadesShooter.velocidad = velocidadesShooter.launchpad;
+    }
 
-      SmartDashboard.putNumber("ANGULO", anguloFinal);
-      if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
-        MOTORCAPUCHA.set(0.3);
-      } else if ((anguloFinal >= (-AnguloCapuchaConfig - 1)) && (anguloFinal <= (-AnguloCapuchaConfig + 1))) {
-        MOTORCAPUCHA.set(0);
-      } else if (anguloFinal <= (-AnguloCapuchaConfig - 1)) {
-        MOTORCAPUCHA.set(-0.3);
+
+      double kpangulo=0.2;
+       double anguloerror = -AnguloCapuchaConfig-anguloFinal;
+       double ajusteangulo=anguloerror*kpangulo;
+
+       if (ajusteangulo > 0.5) {
+
+        ajusteanguloamotor = 0.5;
+  
+      } else if (ajusteangulo < 0.5&&ajusteangulo>-0.5) {
+  
+        ajusteanguloamotor = ajusteangulo;
+  
+      }else if(ajusteangulo<-0.5){
+  
+        ajusteanguloamotor = -0.5;
+  
       }
+
+      MOTORCAPUCHA.set(-ajusteanguloamotor);
 
 
 

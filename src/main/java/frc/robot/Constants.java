@@ -199,7 +199,7 @@ public class Constants {
 
         public static final double fender = 25;
         public static final double tarmac = 19;
-        public static final double  launchpad = 17;
+        public static final double  launchpad = 23;
         public static double velocidad;
     }
 

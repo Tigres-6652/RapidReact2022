@@ -55,10 +55,8 @@ public class Constants {
     public static final class Neumatica { // // CONSTANTES DE LOS PUERTOS DE SOLENOIDES
 
         public static int KPISTINTAKE1 = 0; // Piston intake
-        public static int KPISTINTAKE2 = 1; // Piston intake
 
-        public static int KPISTCHASIS1 = 2; // Piston para cambios
-        public static int KPISTCHASIS2 = 3; // Piston para cambios
+        public static int KPISTCHASIS1 = 1; // Piston para cambios
 
     }
 
@@ -84,7 +82,7 @@ public class Constants {
 
     public static final class LimeLight {
 
-        public static double kp = -0.04;
+        public static double kp = -0.095;
 
   // ¿Cuántos grados hacia atrás gira su centro de atención desde la posición
   // perfectamente vertical?
@@ -92,7 +90,7 @@ public class Constants {
   // distancia desde el centro de la lente Limelight hasta el suelo
   public static double alturaAlPisoPugadasLL = 22.4;
   // distancia del objetivo al suelo
-  public static double alturaUpperPulgadas = 105.1 ; // distancia hub 103.9 in
+  public static double alturaUpperPulgadas = 103.9 ; // distancia hub 103.9 in
 
     }
 
@@ -200,8 +198,8 @@ public class Constants {
     public static final class anguloCapucha {
 
         public static final double fender = 25;
-        public static final double tarmac = 20;
-        public static final double  launchpad = 17;
+        public static final double tarmac = 19;
+        public static final double  launchpad = 23;
         public static double velocidad;
     }
 

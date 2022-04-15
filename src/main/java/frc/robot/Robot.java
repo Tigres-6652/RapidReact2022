@@ -13,7 +13,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
@@ -38,7 +37,6 @@ import frc.robot.Constants.LimeLight;
 import frc.robot.Constants.Motores;
 import frc.robot.Constants.Neumatica;
 import frc.robot.Constants.VelocidadChasis;
-import frc.robot.Constants.anguloCapucha;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
 import frc.robot.Constants.Motores.Climber;

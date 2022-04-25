@@ -1,4 +1,62 @@
-
+/*
+*               //////  Hecho con mucho amor para: Rodolfo Roa Aguilar (2000 - 2020)  //////
+*
+*                       Hecho por:
+*                       Andrés Monsiváis Salazar
+*                       Juan Carlos Valdez Flores
+*                       Jose Juan Guajardo Garcia 
+*
+*                       _______ _____ _____ _____  ______  _____     __    __ _____ ___  
+*                      |__   __|_   _/ ____|  __ \|  ____|/ ____|   / /   / /| ____|__ \                     
+*                         | |    | || |  __| |__) | |__  | (___    / /_  / /_| |__    ) |
+*                         | |    | || | |_ |  _  /|  __|  \___ \  | '_ \| '_ \___ \  / / 
+*                         | |   _| || |__| | | \ \| |____ ____) | | (_) | (_) |__) |/ /_ 
+*                         |_|  |_____\_____|_|  \_\______|_____/   \___/ \___/____/|____|
+*                       
+*                                                                                                                             
+*                        :++++++++++++++++++++++++++=: :-=+++++++++++==++=========-:                             
+*                        :#*++++===============+#*-..=########****##########*+++++*##=                           
+*                        :#+-----======--:::::=#+. =#*==----===----==+++*****#*+-::-=#*.                         
+*                        :#+---==========-:::-#+  *#*+**###############**+=--:-=++=-:-#*                         
+*                        :#+---===+++++===:::*#. +#####+*##**++===-----====++++=---=--=#-                        
+*                        :#+--===++++++===::-#* .###*=-====++==+***####***+=--::----::-#=                        
+*                        :#+---===+++++===::-#= -#+--=+*#######*++=---------==--::::::=#-                        
+*                        :#+----=========-::-#= =#**#######*+=--==++++++=--::::::::::-*#.                        
+*                        :#+-----=======-:::-#= =####+=#*=-=+*##*+==--::::::::::::::-*#:                         
+*                        :#+----------------=#= =#*=--==+###+=====---------------==*#*.                          
+*                        :####################= =#=-+*###*==*#####**************#*+=:                            
+*                                               =#####=+--*#+=--#+                                               
+*                                               =###+-:--#*=----#+                                               
+*                                               =##=::::+#=-----#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#---::-#+                                               
+*                                               -#=:::::*#-::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::-=*#=-:::-#+                                               
+*                                               -#=::=##*+*#+-:-#+                                               
+*                                               -#=:=#+-:::=#+:-#+                                               
+*                                               -#=:+#-:::::*#:-#+                                               
+*                                               -#=:=#+::::=#*:-#+                                               
+*                                               -#=::+#*++*#*-:-#+                                               
+*                                               -#=:::-=++=-:::-#+                                               
+*                                               -#=::::::-:::::-#+                                               
+*                                               -#*+++++++++++++#+                                               
+*                                               :================-                                               
+*                                                                                                           
+*                           -------------------Are You Joining The ROAR?-------------------                                                                                                                       
+*/
 package frc.robot;
 
 //*********Librerias *************** */
@@ -40,7 +98,6 @@ import frc.robot.Constants.VelocidadChasis;
 import frc.robot.Constants.statusrobot;
 import frc.robot.Constants.velocidadesShooter;
 import frc.robot.Constants.Motores.Climber;
-
 
 public class Robot extends TimedRobot {
 
@@ -150,9 +207,9 @@ public class Robot extends TimedRobot {
     resetLimitSwitch();
     time = Timer.getFPGATimestamp();
     // Cálculos
-    double x = tx.getDouble(0.0);
+    //double x = tx.getDouble(0.0);
     double y = ty.getDouble(0.0);
-    double area = ta.getDouble(0.0);
+    //double area = ta.getDouble(0.0);
     capuchavalor = MOTORCAPUCHA.getSelectedSensorPosition();
     anguloFinal = -1 * capuchavalor / ktick2Degree;
     double angleToGoalDegrees = LimeLight.anguloInclinacionLL + y;
@@ -166,24 +223,24 @@ public class Robot extends TimedRobot {
 
     // SmartDashboard.putBoolean("Intake", !statusrobot.IntakeState);
     SmartDashboard.putBoolean("Compresor", !statusrobot.compresorState);
-     SmartDashboard.putNumber("RPM shooter",
-     MOTORSHOOTERRIGHT.getSelectedSensorVelocity() * -1 * 10 * 60 / 2048);
+    // SmartDashboard.putNumber("RPM shooter",
+    // MOTORSHOOTERRIGHT.getSelectedSensorVelocity() * -1 * 10 * 60 / 2048);
     // SmartDashboard.putNumber("Current Shooter",
     // (pdp.getCurrent(12) + pdp.getCurrent(3)) / 2);
     // SmartDashboard.putBoolean("Reset Capucha", limitcapucha.get());
-    SmartDashboard.putNumber("Valor Capucha",
-        MOTORCAPUCHA.getSelectedSensorPosition());
-    SmartDashboard.putNumber("Corriente Capucha",
-        MOTORCAPUCHA.getSupplyCurrent());
-    SmartDashboard.putNumber("Angulo Capucha", anguloFinal);
-    SmartDashboard.putNumber("LL X Value", x);
-    SmartDashboard.putNumber("LL Y Value", y);
-    SmartDashboard.putNumber("LL X Area", area);
+    // SmartDashboard.putNumber("Valor Capucha",
+    // MOTORCAPUCHA.getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Corriente Capucha",
+    // MOTORCAPUCHA.getSupplyCurrent());
+    // SmartDashboard.putNumber("Angulo Capucha", anguloFinal);
+    // SmartDashboard.putNumber("LL X Value", x);
+    // SmartDashboard.putNumber("LL Y Value", y);
+    // SmartDashboard.putNumber("LL X Area", area);
     SmartDashboard.putNumber("Distancia Fender", distanciaFender);
-    lecturaAuto = SmartDashboard.getNumber("autoValue", 0);
+    // lecturaAuto = SmartDashboard.getNumber("autoValue", 0);
 
-    velocidaad = SmartDashboard.getNumber("ajuste velocidad", 0);
-     anguloo = SmartDashboard.getNumber("ajuste ANGULO", 0);
+    // velocidaad = SmartDashboard.getNumber("ajuste velocidad", 0);
+    // anguloo = SmartDashboard.getNumber("ajuste ANGULO", 0);
 
     ///// /*NO BORRAR, SON LECTURAS EN CASO DE ALGUN ERROR DETECTARLO MAS RAPIDO*/
 
@@ -210,8 +267,6 @@ public class Robot extends TimedRobot {
     double distanciainches = vuelta * 6.1 * Math.PI; // Units.inchesToMeters(3.2 );
     distmeters = Units.inchesToMeters(distanciainches);
 
-
-
   }
 
   @Override
@@ -230,7 +285,6 @@ public class Robot extends TimedRobot {
 
     if (lecturaAuto == 0) {
       autonomo_2_cargos_linea_fender();
-
 
     } else if (lecturaAuto == 1) {
       autonomo_1_taxi_pegado_fender();
@@ -287,7 +341,7 @@ public class Robot extends TimedRobot {
       MOTORI4ENC.setNeutralMode(NeutralMode.Brake);
       MOTORI5.setNeutralMode(NeutralMode.Brake);
       MOTORI6.setNeutralMode(NeutralMode.Brake);
-  
+
     } else {
 
       MOTORD1ENC.setNeutralMode(NeutralMode.Coast);
@@ -298,18 +352,22 @@ public class Robot extends TimedRobot {
       MOTORI6.setNeutralMode(NeutralMode.Coast);
     }
 
-   /* ajustarvelocidad();
-    AjustarAngulo();
-
-    if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
-      lanzamiento_de_distintos_lados();
-    } else {
-      // Mover Chassis
-      double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) - JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
-      chasis.arcadeDrive(
-          -VelocidadChasis.velocidadgiro * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
-          -VelocidadChasis.velocidadX * -velocidad);
-    }*/
+    /*
+     * ajustarvelocidad();
+     * AjustarAngulo();
+     * 
+     * if (JoystickDriver1.getRawButton(Kxbox.BOTONES.A)) {
+     * lanzamiento_de_distintos_lados();
+     * } else {
+     * // Mover Chassis
+     * double velocidad = JoystickDriver1.getRawAxis(Kxbox.AXES.RT) -
+     * JoystickDriver1.getRawAxis(Kxbox.AXES.LT);
+     * chasis.arcadeDrive(
+     * -VelocidadChasis.velocidadgiro *
+     * JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_izquierdo_eje_X),
+     * -VelocidadChasis.velocidadX * -velocidad);
+     * }
+     */
 
   }
 
@@ -587,7 +645,6 @@ public class Robot extends TimedRobot {
     double rpmconv = KPIDShooter.torpm * rpmtotal;
     double valor = -1 * rpmconv;// JoystickDriver1.getRawAxis(Kxbox.AXES.joystick_derecho_eje_Y);
 
-
     double targetVelocity_UnitsPer100ms = valor * 3000 * 2048.0 / 600.0;
     _sbshoot.setLength(0);
     MOTORSHOOTERLEFT.set(TalonFXControlMode.Velocity, targetVelocity_UnitsPer100ms);
@@ -625,11 +682,11 @@ public class Robot extends TimedRobot {
 
       ajustdist = 0.46;
 
-    } else if (ajustedistancia < 0.46&&ajustedistancia>-0.46) {
+    } else if (ajustedistancia < 0.46 && ajustedistancia > -0.46) {
 
       ajustdist = ajustedistancia;
 
-    }else if(ajustedistancia<-0.46){
+    } else if (ajustedistancia < -0.46) {
 
       ajustdist = -0.46;
 
@@ -639,11 +696,11 @@ public class Robot extends TimedRobot {
 
       ajutGi = 0.6;
 
-    } else if (ajusteGiro < 0.6&&ajusteGiro>-0.6) {
+    } else if (ajusteGiro < 0.6 && ajusteGiro > -0.6) {
 
       ajutGi = ajusteGiro;
 
-    }else if(ajusteGiro<-0.6){
+    } else if (ajusteGiro < -0.6) {
 
       ajutGi = -0.6;
 
@@ -721,13 +778,11 @@ public class Robot extends TimedRobot {
   public void returnHome() {
 
     if (JoystickDriver2.getRawButton(Kxbox.BOTONES.RB)) {
-     
-        AnguloCapuchaConfig = 0;
 
-      } 
+      AnguloCapuchaConfig = 0;
+
     }
-
-  
+  }
 
   public void resetLimitSwitch() {
     if (limitcapucha.get() == false) {
@@ -818,32 +873,27 @@ public class Robot extends TimedRobot {
       velocidadesShooter.velocidad = velocidadesShooter.launchpad;
     }
 
+    double kpangulo = 0.2;
+    double anguloerror = -AnguloCapuchaConfig - anguloFinal;
+    double ajusteangulo = anguloerror * kpangulo;
 
-      double kpangulo=0.2;
-       double anguloerror = -AnguloCapuchaConfig-anguloFinal;
-       double ajusteangulo=anguloerror*kpangulo;
+    if (ajusteangulo > 0.5) {
 
-       if (ajusteangulo > 0.5) {
+      ajusteanguloamotor = 0.5;
 
-        ajusteanguloamotor = 0.5;
-  
-      } else if (ajusteangulo < 0.5&&ajusteangulo>-0.5) {
-  
-        ajusteanguloamotor = ajusteangulo;
-  
-      }else if(ajusteangulo<-0.5){
-  
-        ajusteanguloamotor = -0.5;
-  
-      }
+    } else if (ajusteangulo < 0.5 && ajusteangulo > -0.5) {
 
-      MOTORCAPUCHA.set(-ajusteanguloamotor);
+      ajusteanguloamotor = ajusteangulo;
 
+    } else if (ajusteangulo < -0.5) {
 
+      ajusteanguloamotor = -0.5;
 
     }
 
-  
+    MOTORCAPUCHA.set(-ajusteanguloamotor);
+
+  }
 
   public void ajusteDeTiroautonomo() {
     if (anguloFinal >= (-AnguloCapuchaConfig + 1)) {
@@ -1041,8 +1091,6 @@ public class Robot extends TimedRobot {
       velocidadesShooter.velocidad = -6050;
     }
 
-
-
   }
 
   public void AjustarAngulo() {
@@ -1066,7 +1114,6 @@ public class Robot extends TimedRobot {
       MOTORINDEXER.set(0);
     }
 
-
     // Apuntar
     if (JoystickDriver2.getRawAxis(Kxbox.AXES.LT) >= 0.3) {
       ShooterPID(velocidaad);
@@ -1078,3 +1125,62 @@ public class Robot extends TimedRobot {
   }
 
 }
+/*
+*               //////  Hecho con mucho amor para: Rodolfo Roa Aguilar (2000 - 2020)  //////
+*
+*                       Hecho por:
+*                       Andrés Monsiváis Salazar
+*                       Juan Carlos Valdez Flores
+*                       Jose Juan Guajardo Garcia 
+*
+*                       _______ _____ _____ _____  ______  _____     __    __ _____ ___  
+*                      |__   __|_   _/ ____|  __ \|  ____|/ ____|   / /   / /| ____|__ \                     
+*                         | |    | || |  __| |__) | |__  | (___    / /_  / /_| |__    ) |
+*                         | |    | || | |_ |  _  /|  __|  \___ \  | '_ \| '_ \___ \  / / 
+*                         | |   _| || |__| | | \ \| |____ ____) | | (_) | (_) |__) |/ /_ 
+*                         |_|  |_____\_____|_|  \_\______|_____/   \___/ \___/____/|____|
+*                       
+*                                                                                                                             
+*                        :++++++++++++++++++++++++++=: :-=+++++++++++==++=========-:                             
+*                        :#*++++===============+#*-..=########****##########*+++++*##=                           
+*                        :#+-----======--:::::=#+. =#*==----===----==+++*****#*+-::-=#*.                         
+*                        :#+---==========-:::-#+  *#*+**###############**+=--:-=++=-:-#*                         
+*                        :#+---===+++++===:::*#. +#####+*##**++===-----====++++=---=--=#-                        
+*                        :#+--===++++++===::-#* .###*=-====++==+***####***+=--::----::-#=                        
+*                        :#+---===+++++===::-#= -#+--=+*#######*++=---------==--::::::=#-                        
+*                        :#+----=========-::-#= =#**#######*+=--==++++++=--::::::::::-*#.                        
+*                        :#+-----=======-:::-#= =####+=#*=-=+*##*+==--::::::::::::::-*#:                         
+*                        :#+----------------=#= =#*=--==+###+=====---------------==*#*.                          
+*                        :####################= =#=-+*###*==*#####**************#*+=:                            
+*                                               =#####=+--*#+=--#+                                               
+*                                               =###+-:--#*=----#+                                               
+*                                               =##=::::+#=-----#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#------#+                                               
+*                                               -#=:::::*#---::-#+                                               
+*                                               -#=:::::*#-::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::::*#:::::-#+                                               
+*                                               -#=:::-=*#=-:::-#+                                               
+*                                               -#=::=##*+*#+-:-#+                                               
+*                                               -#=:=#+-:::=#+:-#+                                               
+*                                               -#=:+#-:::::*#:-#+                                               
+*                                               -#=:=#+::::=#*:-#+                                               
+*                                               -#=::+#*++*#*-:-#+                                               
+*                                               -#=:::-=++=-:::-#+                                               
+*                                               -#=::::::-:::::-#+                                               
+*                                               -#*+++++++++++++#+                                               
+*                                               :================-                                               
+*                                                                                                           
+*                           -------------------Are You Joining The ROAR?-------------------                                                                                                                       
+*/

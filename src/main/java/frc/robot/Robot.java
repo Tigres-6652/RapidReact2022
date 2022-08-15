@@ -447,7 +447,7 @@ public class Robot extends TimedRobot {
 
     if (JoystickDriver1.getRawButton(Kxbox.BOTONES.RB)) {
       PISTINTAKE.set(true);
-      MOTORINTAKE.set(0.7);
+      MOTORINTAKE.set(0.6);
 
     }
 
@@ -912,7 +912,6 @@ public class Robot extends TimedRobot {
 
   public void PIDchasis() {
 
-    double rampchasis = 0.3;
 
     MOTORD1ENC.configFactoryDefault();
     MOTORD2.configFactoryDefault();
@@ -923,14 +922,6 @@ public class Robot extends TimedRobot {
 
     MOTORD1ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     MOTORI4ENC.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-
-    MOTORD1ENC.configOpenloopRamp(rampchasis);
-    MOTORD2.configOpenloopRamp(rampchasis);
-    MOTORD3.configOpenloopRamp(rampchasis);
-    MOTORI4ENC.configOpenloopRamp(rampchasis);
-    MOTORI5.configOpenloopRamp(rampchasis);
-    MOTORI6.configOpenloopRamp(rampchasis);
-
   }
 
   public void autonomo_2_cargos_linea_fender() {
